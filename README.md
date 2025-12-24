@@ -24,6 +24,7 @@ Gradia is a lightweight Chrome extension screensaver built with React, Vite, and
 - **Simple Controls**: Launch with one click, exit with Escape key
 - **Lightweight**: Minimal permissions, no background tracking
 - **Customizable**: Easy-to-use popup interface for selecting gradient themes
+- **Optional Password Lock**: Protect fullscreen mode with a password stored only as a hash
 
 ## Tech Stack
 
@@ -79,8 +80,21 @@ pnpm build
 1. Click the Gradia icon in your browser toolbar
 2. A popup will appear with gradient preset options
 3. Select your preferred gradient from the dropdown menu
-4. Click "Start Screensaver" to launch in fullscreen
-5. Press `Escape` to close the screensaver
+4. (Optional) Enter an exit password to protect fullscreen mode
+5. Click "Start" to launch in fullscreen
+6. Press `Escape` to close the screensaver
+
+### Password Protection
+
+Gradia supports an optional password to prevent leaving fullscreen without authorization:
+
+1. In the popup, enter a password in the "Exit Password (optional)" field.
+2. Start the screensaver. The password is hashed using SHA-256 and stored in extension storage.
+3. While the screensaver is running, pressing `Escape` will open a password prompt.
+4. Only the correct password will unlock and close the screensaver.
+5. To remove password protection for future sessions, start the screensaver with an empty password field.
+
+To make it harder to close the screensaver using the browser window controls while a password is active, the background script will recreate the fullscreen window if it is closed while protection is enabled. Note that users can still forcibly quit the browser or disable the extension; this feature is intended as a lightweight protection, not a full kiosk or system-level lock.
 
 ### Available Gradients
 

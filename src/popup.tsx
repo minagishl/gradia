@@ -22,18 +22,31 @@ import {
   FieldLabel,
   FieldDescription,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { hashPassword } from "@/lib/password";
 import { GRADIENT_PRESETS } from "./types/gradients";
 
 function Popup() {
   const [selectedGradient, setSelectedGradient] = useState(
     GRADIENT_PRESETS[0].id
   );
+  const [password, setPassword] = useState("");
+  const [hasConfiguredPassword, setHasConfiguredPassword] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const result = await browser.storage.local.get("selectedGradient");
+      const result = await browser.storage.local.get([
+        "selectedGradient",
+        "screensaverPasswordHash",
+      ]);
+
       if (result.selectedGradient) {
         setSelectedGradient(result.selectedGradient as string);
+      }
+
+      if (typeof result.screensaverPasswordHash === "string") {
+        setHasConfiguredPassword(true);
       }
     })();
   }, []);
@@ -43,13 +56,46 @@ function Popup() {
     await browser.storage.local.set({ selectedGradient: gradientId });
   };
 
-  const openScreensaver = () => {
-    const screensaverUrl = browser.runtime.getURL("src/main.html");
-    browser.windows.create({
-      url: screensaverUrl,
-      type: "popup",
-      state: "fullscreen",
-    });
+  const handleStartScreensaver = async () => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+    try {
+      const trimmedPassword = password.trim();
+      let passwordHash: string | null = null;
+
+      if (trimmedPassword.length > 0) {
+        passwordHash = await hashPassword(trimmedPassword);
+      }
+
+      await browser.storage.local.set({
+        selectedGradient,
+        screensaverPasswordHash: passwordHash,
+        screensaverPasswordProtectionEnabled: Boolean(passwordHash),
+      });
+
+      const screensaverUrl = browser.runtime.getURL("src/main.html");
+      const createdWindow = await browser.windows.create({
+        url: screensaverUrl,
+        type: "popup",
+        state: "fullscreen",
+      });
+
+      await browser.runtime.sendMessage({
+        type: "SCREENSAVER_STARTED",
+        windowId: createdWindow.id,
+        passwordProtectionEnabled: Boolean(passwordHash),
+      });
+
+      if (passwordHash) {
+        setHasConfiguredPassword(true);
+        setPassword("");
+      } else {
+        setHasConfiguredPassword(false);
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -62,9 +108,9 @@ function Popup() {
       </CardHeader>
       <CardContent>
         <form
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
-            openScreensaver();
+            await handleStartScreensaver();
           }}
           className="space-y-6"
         >
@@ -90,9 +136,37 @@ function Popup() {
                 Choose which gradient preset to use in the screensaver.
               </FieldDescription>
             </Field>
+            <Field>
+              <FieldLabel htmlFor="screensaverPassword">
+                Exit Password (optional)
+              </FieldLabel>
+              <Input
+                id="screensaverPassword"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Leave empty to disable password protection"
+              />
+              <FieldDescription>
+                When a password is set, leaving fullscreen requires this
+                password. Starting with an empty password clears any existing
+                password.
+              </FieldDescription>
+              {hasConfiguredPassword && password.length === 0 && (
+                <p className="text-muted-foreground text-xs">
+                  A password is currently configured. Submitting with an empty
+                  password will remove it for the next session.
+                </p>
+              )}
+            </Field>
             <Field orientation="horizontal">
-              <Button type="submit" className="w-full cursor-pointer">
-                Start
+              <Button
+                type="submit"
+                className="w-full cursor-pointer"
+                disabled={isSaving}
+              >
+                {isSaving ? "Starting..." : "Start"}
               </Button>
             </Field>
           </FieldGroup>
