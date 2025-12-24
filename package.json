@@ -8,11 +8,10 @@
     "build": "tsc && vite build",
     "build:firefox": "pnpm build && node scripts/firefox.cjs",
     "preview": "vite preview",
-    "check": "biome check ./src",
-    "check:write": "biome check --write ./src",
-    "format": "biome format .",
-    "format:write": "biome format --write ./src",
-    "lint": "biome lint ./src"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --check \"src/**/*.{ts,tsx,json,css}\"",
+    "format:write": "prettier --write \"src/**/*.{ts,tsx,json,css}\""
   },
   "keywords": [
     "education",
@@ -23,8 +22,8 @@
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
     "@crxjs/vite-plugin": "2.0.0-beta.32",
+    "@eslint/js": "^9.39.2",
     "@tailwindcss/vite": "^4.1.18",
     "@types/chrome": "0.0.318",
     "@types/node": "^25.0.3",
@@ -34,14 +33,21 @@
     "@types/webextension-polyfill": "^0.12.3",
     "@vitejs/plugin-react": "^5.1.2",
     "archiver": "^7.0.1",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.1.18",
     "terser": "^5.44.1",
     "typescript": "5.8.3",
+    "typescript-eslint": "^8.50.1",
     "vite": "7.3.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@biomejs/biome",
       "esbuild"
     ]
   },
