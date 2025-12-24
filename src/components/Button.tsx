@@ -40,11 +40,14 @@ export const Button = ({
   minimize = false,
   icon,
 }: ButtonProps) => {
-  const baseClasses = "text-white border-none rounded flex items-center justify-center";
+  const baseClasses =
+    "text-white border-none rounded flex items-center justify-center";
   const variantClasses = getVariantClasses(variant);
   const sizeClasses = minimize ? "p-2 w-9 h-9" : "py-2 px-4";
   const gapClasses = minimize ? "" : "gap-2";
-  const stateClasses = disabled ? "opacity-70 cursor-not-allowed" : "cursor-pointer";
+  const stateClasses = disabled
+    ? "opacity-70 cursor-not-allowed"
+    : "cursor-pointer";
 
   return (
     <button

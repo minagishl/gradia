@@ -35,17 +35,14 @@ function Popup() {
   return (
     <div className="p-4">
       <div className="mb-4">
-        <label
-          htmlFor="gradientPreset"
-          className="block mb-2 text-sm"
-        >
+        <label htmlFor="gradientPreset" className="mb-2 block text-sm">
           Gradient Preset
         </label>
         <select
           id="gradientPreset"
           value={selectedGradient}
           onChange={(e) => handleGradientChange(e.target.value)}
-          className="w-full h-8 px-2 text-sm border border-gray-300 rounded box-border"
+          className="box-border h-8 w-full rounded border border-gray-300 px-2 text-sm"
         >
           {GRADIENT_PRESETS.map((preset) => (
             <option key={preset.id} value={preset.id}>
