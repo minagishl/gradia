@@ -12,6 +12,15 @@ const manifest = defineManifest({
     "A lightweight Chrome extension screensaver built with React, Vite, and Canvas.",
   author: { email: "minagishl@icloud.com" },
   permissions: ["storage"],
+  commands: {
+    start_screensaver: {
+      suggested_key: {
+        default: "Ctrl+Shift+S",
+        mac: "Command+Shift+S",
+      },
+      description: "Start screensaver",
+    },
+  },
   icons: {
     "16": "src/assets/icon16.png",
     "19": "src/assets/icon19.png",
