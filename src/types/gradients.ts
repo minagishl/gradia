@@ -475,8 +475,8 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     },
   },
   {
-    id: "deep-orbit",
-    name: "Deep Orbit",
+    id: "orbit",
+    name: "Orbit",
     canvas: { pixelDensity: 1, fov: 45 },
     props: {
       animate: "on",
@@ -519,8 +519,8 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     },
   },
   {
-    id: "solar-drift",
-    name: "Solar Drift",
+    id: "solar",
+    name: "Solar",
     canvas: { pixelDensity: 1, fov: 45 },
     props: {
       animate: "on",
@@ -563,8 +563,8 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     },
   },
   {
-    id: "velvet-dawn",
-    name: "Velvet Dawn",
+    id: "velvet",
+    name: "Velvet",
     canvas: { pixelDensity: 1, fov: 45 },
     props: {
       animate: "on",
