@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { hashPassword } from "@/lib/password";
-import { GRADIENT_PRESETS } from "./types/gradients";
+import { GRADIENT_PRESETS } from "./lib/gradients";
 
 function Popup() {
   const [selectedGradient, setSelectedGradient] = useState(

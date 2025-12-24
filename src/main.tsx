@@ -22,7 +22,7 @@ import {
   GRADIENT_PRESETS,
   type GradientPreset,
   generateRandomPreset,
-} from "./types/gradients";
+} from "./lib/gradients";
 import { hashPassword } from "./lib/password";
 
 function Screensaver() {

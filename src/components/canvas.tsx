@@ -1,5 +1,5 @@
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
-import type { GradientPreset } from "../types/gradients";
+import type { GradientPreset } from "../lib/gradients";
 
 interface ScreensaverCanvasProps {
   preset: GradientPreset;
