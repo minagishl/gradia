@@ -46,6 +46,8 @@ function Screensaver() {
 
   useEffect(() => {
     const originalWarn = console.warn;
+    const originalError = console.error;
+
     console.warn = (...args) => {
       const [message] = args;
       if (
@@ -57,76 +59,18 @@ function Screensaver() {
       originalWarn(...args);
     };
 
-    const enterFullscreen = () => {
-      const element = document.documentElement;
-      const elem = element as HTMLElement & {
-        webkitRequestFullscreen?: () => void;
-        webkitRequestFullScreen?: () => void;
-        mozRequestFullScreen?: () => void;
-        msRequestFullscreen?: () => void;
-      };
-
-      if (element.requestFullscreen) {
-        element.requestFullscreen().catch(() => {});
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      } else if (elem.webkitRequestFullScreen) {
-        elem.webkitRequestFullScreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
+    console.error = (...args) => {
+      const [message] = args;
+      if (
+        typeof message === "string" &&
+        (message.includes("requestFullscreen") ||
+          message.includes("user gesture") ||
+          message.includes("Failed to execute"))
+      ) {
+        return;
       }
+      originalError(...args);
     };
-
-    const attemptFullscreen = () => {
-      if (document.readyState === "complete") {
-        enterFullscreen();
-      }
-    };
-
-    const handleLoad = () => {
-      setTimeout(() => {
-        enterFullscreen();
-      }, 500);
-    };
-
-    const handleFullscreenChange = () => {
-      const doc = document as Document & {
-        webkitFullscreenElement?: Element | null;
-        mozFullScreenElement?: Element | null;
-        msFullscreenElement?: Element | null;
-      };
-      const isFullscreen = !!(
-        document.fullscreenElement ||
-        doc.webkitFullscreenElement ||
-        doc.mozFullScreenElement ||
-        doc.msFullscreenElement
-      );
-
-      if (!isFullscreen) {
-        setTimeout(() => {
-          enterFullscreen();
-        }, 100);
-      }
-    };
-
-    if (document.readyState === "complete") {
-      setTimeout(() => {
-        enterFullscreen();
-      }, 1000);
-    } else {
-      window.addEventListener("load", handleLoad);
-    }
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
-    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
-
-    const fullscreenTimeout = setTimeout(() => {
-      attemptFullscreen();
-    }, 2000);
 
     (async () => {
       const result = await browser.storage.local.get([
@@ -241,21 +185,7 @@ function Screensaver() {
 
     return () => {
       console.warn = originalWarn;
-      clearTimeout(fullscreenTimeout);
-      window.removeEventListener("load", handleLoad);
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullscreenChange
-      );
-      document.removeEventListener(
-        "mozfullscreenchange",
-        handleFullscreenChange
-      );
-      document.removeEventListener(
-        "MSFullscreenChange",
-        handleFullscreenChange
-      );
+      console.error = originalError;
       browser.storage.onChanged.removeListener(listener);
       window.removeEventListener("keydown", handleKeyDown);
       if (konamiTimeout) {

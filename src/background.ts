@@ -90,7 +90,7 @@ async function startScreensaver(multiMonitor: boolean) {
       for (const display of displays) {
         const bounds = display.bounds;
         const createdWindow = await browser.windows.create({
-          url: screensaverUrl,
+          url: `${screensaverUrl}?multiMonitor=true`,
           type: "popup",
           left: bounds.left,
           top: bounds.top,
@@ -106,11 +106,15 @@ async function startScreensaver(multiMonitor: boolean) {
       }
 
       if (windows.length > 0) {
-        await browser.runtime.sendMessage({
-          type: "SCREENSAVER_STARTED",
-          windowId: windows[0],
-          passwordProtectionEnabled: Boolean(passwordHash),
-        });
+        try {
+          await browser.runtime.sendMessage({
+            type: "SCREENSAVER_STARTED",
+            windowId: windows[0],
+            passwordProtectionEnabled: Boolean(passwordHash),
+          });
+        } catch {
+          // Ignore message errors
+        }
       }
     } else {
       const createdWindow = await browser.windows.create({
@@ -119,11 +123,15 @@ async function startScreensaver(multiMonitor: boolean) {
         state: "fullscreen",
       });
 
-      await browser.runtime.sendMessage({
-        type: "SCREENSAVER_STARTED",
-        windowId: createdWindow.id,
-        passwordProtectionEnabled: Boolean(passwordHash),
-      });
+      try {
+        await browser.runtime.sendMessage({
+          type: "SCREENSAVER_STARTED",
+          windowId: createdWindow.id,
+          passwordProtectionEnabled: Boolean(passwordHash),
+        });
+      } catch {
+        // Ignore message errors
+      }
     }
   } catch (error) {
     logger.error(`Failed to start screensaver: ${String(error)}`);
