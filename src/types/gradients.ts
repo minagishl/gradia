@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import type { ShaderGradient } from "shadergradient";
+import type { ShaderGradient } from "@shadergradient/react";
 
 type ShaderGradientProps = ComponentProps<typeof ShaderGradient> & {
   axesHelper?: string;
