@@ -21,7 +21,9 @@ Gradia is a lightweight Chrome extension screensaver built with React, Vite, and
 - **10 Stunning Gradient Presets**: Choose from Aurora Borealis, Cosmic Nebula, Galaxy Swirl, and more
 - **Advanced Animations**: Multi-layer radial gradients with wave-like motion and dynamic color positioning
 - **Smooth Performance**: Hardware-accelerated Canvas rendering with blend modes
-- **Simple Controls**: Launch with one click, exit with Escape key
+- **Simple Controls**: Launch with one click or keyboard shortcut, exit with Escape key
+- **Keyboard Shortcut**: Quick launch with `Ctrl+Shift+S` (Windows/Linux) or `Command+Shift+S` (Mac)
+- **Multi-Monitor Support**: Option to start screensaver on all connected monitors simultaneously
 - **Lightweight**: Minimal permissions, no background tracking
 - **Customizable**: Easy-to-use popup interface for selecting gradient themes
 - **Optional Password Lock**: Protect fullscreen mode with a password stored only as a hash
@@ -81,8 +83,25 @@ pnpm build
 2. A popup will appear with gradient preset options
 3. Select your preferred gradient from the dropdown menu
 4. (Optional) Enter an exit password to protect fullscreen mode
-5. Click "Start" to launch in fullscreen
-6. Press `Escape` to close the screensaver
+5. (Optional) Check "Start on all monitors" to launch on all connected displays
+6. Click "Start" to launch in fullscreen
+7. Press `Escape` to close the screensaver
+
+### Keyboard Shortcut
+
+You can quickly launch the screensaver using a keyboard shortcut:
+- **Windows/Linux**: `Ctrl+Shift+S`
+- **Mac**: `Command+Shift+S`
+
+The shortcut uses your saved settings (gradient preset and multi-monitor preference). You can customize or disable the shortcut in Chrome's extension shortcuts page (`chrome://extensions/shortcuts`).
+
+### Multi-Monitor Support
+
+Gradia supports multiple monitors. When the "Start on all monitors" option is enabled:
+- The screensaver will launch on all connected displays simultaneously
+- Each monitor will display the same gradient preset
+- All windows will automatically enter fullscreen mode
+- Password protection applies to all screensaver windows
 
 ### Password Protection
 
