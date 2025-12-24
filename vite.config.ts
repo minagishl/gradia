@@ -10,8 +10,21 @@ const manifest = defineManifest({
     "A lightweight Chrome extension screensaver built with React, Vite, and Canvas.",
   author: { email: "minagishl@icloud.com" },
   permissions: ["storage"],
+  icons: {
+    "16": "src/assets/icon16.png",
+    "19": "src/assets/icon19.png",
+    "38": "src/assets/icon38.png",
+    "128": "src/assets/icon128.png",
+  },
+
   action: {
     default_title: "Gradia",
+    default_icon: {
+      "16": "src/assets/icon16.png",
+      "19": "src/assets/icon19.png",
+      "38": "src/assets/icon38.png",
+      "128": "src/assets/icon128.png",
+    },
     default_popup: "src/popup.html",
   },
   background: {

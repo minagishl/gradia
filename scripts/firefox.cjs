@@ -23,8 +23,20 @@ const archiver = require("archiver");
     // Add Firefox-specific settings
     manifest.browser_specific_settings = {
       gecko: {
-        id: "operationcheck@proton.me",
+        id: "minagishl@icloud.com",
       },
+    };
+
+    // Find the background script file dynamically
+    const assetsDir = "./dist/assets";
+    const backgroundFile = fs
+      .readdirSync(assetsDir)
+      .find((file) => file.startsWith("background-"));
+
+    // Modify background for Firefox (Manifest V2 style)
+    manifest.background = {
+      scripts: [`assets/${backgroundFile}`],
+      persistent: false,
     };
 
     // Remove run_at from content_scripts for Firefox compatibility
