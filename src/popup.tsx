@@ -130,6 +130,7 @@ function Popup() {
                       {preset.name}
                     </SelectItem>
                   ))}
+                                    <SelectItem value="random">Random</SelectItem>
                 </SelectContent>
               </Select>
               <FieldDescription>

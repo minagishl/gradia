@@ -18,7 +18,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScreensaverCanvas } from "./components/canvas";
-import { GRADIENT_PRESETS, type GradientPreset } from "./types/gradients";
+import {
+  GRADIENT_PRESETS,
+  type GradientPreset,
+  generateRandomPreset,
+} from "./types/gradients";
 import { hashPassword } from "./lib/password";
 
 function Screensaver() {
@@ -53,11 +57,15 @@ function Screensaver() {
       ]);
 
       if (result.selectedGradient) {
-        const savedPreset = GRADIENT_PRESETS.find(
-          (p) => p.id === result.selectedGradient
-        );
-        if (savedPreset) {
-          setPreset(savedPreset);
+        if (result.selectedGradient === "random") {
+          setPreset(generateRandomPreset());
+        } else {
+          const savedPreset = GRADIENT_PRESETS.find(
+            (p) => p.id === result.selectedGradient
+          );
+          if (savedPreset) {
+            setPreset(savedPreset);
+          }
         }
       }
 
@@ -78,11 +86,15 @@ function Screensaver() {
       [key: string]: browser.Storage.StorageChange;
     }) => {
       if (changes.selectedGradient) {
-        const newPreset = GRADIENT_PRESETS.find(
-          (p) => p.id === changes.selectedGradient.newValue
-        );
-        if (newPreset) {
-          setPreset(newPreset);
+        if (changes.selectedGradient.newValue === "random") {
+          setPreset(generateRandomPreset());
+        } else {
+          const newPreset = GRADIENT_PRESETS.find(
+            (p) => p.id === changes.selectedGradient.newValue
+          );
+          if (newPreset) {
+            setPreset(newPreset);
+          }
         }
       }
     };
