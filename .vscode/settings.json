@@ -3,5 +3,9 @@
   "typescript.validate.enable": true,
   "typescript.format.enable": true,
   "editor.defaultFormatter": "biomejs.biome",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.files.exclude": ["src/components/ui/**"]
 }

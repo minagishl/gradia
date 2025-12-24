@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import { crx, defineManifest } from "@crxjs/vite-plugin";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
 
 const manifest = defineManifest({
   manifest_version: 3,
@@ -49,5 +50,10 @@ export default defineConfig({
   optimizeDeps: {
     include: ["lucide-react"],
     exclude: ["lucide-react/icons"],
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
 });
