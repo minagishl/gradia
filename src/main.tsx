@@ -8,6 +8,18 @@ function Screensaver() {
   const [preset, setPreset] = useState<GradientPreset>(GRADIENT_PRESETS[0]);
 
   useEffect(() => {
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      const [message] = args;
+      if (
+        typeof message === "string" &&
+        message.includes(".dampingFactor has been deprecated")
+      ) {
+        return;
+      }
+      originalWarn(...args);
+    };
+
     // Load saved settings
     (async () => {
       const result = await browser.storage.local.get("selectedGradient");
@@ -47,6 +59,7 @@ function Screensaver() {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      console.warn = originalWarn;
       browser.storage.onChanged.removeListener(listener);
       window.removeEventListener("keydown", handleKeyDown);
     };
