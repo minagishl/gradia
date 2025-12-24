@@ -46,11 +46,13 @@ Gradia is a lightweight Chrome extension screensaver built with React, Vite, and
 ### Build Instructions
 
 Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 Build the extension:
+
 ```bash
 pnpm build
 ```
@@ -90,6 +92,7 @@ pnpm build
 ### Keyboard Shortcut
 
 You can quickly launch the screensaver using a keyboard shortcut:
+
 - **Windows/Linux**: `Ctrl+Shift+S`
 - **Mac**: `Command+Shift+S`
 
@@ -98,9 +101,11 @@ The shortcut uses your saved settings (gradient preset and multi-monitor prefere
 ### Multi-Monitor Support
 
 Gradia supports multiple monitors. When the "Start on all monitors" option is enabled:
+
 - The screensaver will launch on all connected displays simultaneously
 - Each monitor will display the same gradient preset
-- All windows will automatically enter fullscreen mode
+- **Important**: Chrome must be open on all monitors for fullscreen mode to work properly
+- If Chrome is not open on a monitor, the screensaver will open as a window on that monitor instead of fullscreen
 - Password protection applies to all screensaver windows
 
 ### Password Protection
@@ -133,6 +138,7 @@ To make it harder to close the screensaver using the browser window controls whi
 ### Development Setup
 
 1. Clone and install dependencies:
+
 ```bash
 git clone https://github.com/minagishl/gradia.git
 cd gradia
@@ -140,6 +146,7 @@ pnpm install
 ```
 
 2. Build for production:
+
 ```bash
 pnpm build
 ```
