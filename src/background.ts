@@ -3,13 +3,14 @@ import logger from "./logger";
 
 let lockedWindowId: number | null = null;
 let passwordProtectionEnabled = false;
+let multiMonitorWindowIds: number[] = [];
 
 browser.runtime.onInstalled.addListener(() => {
   logger.info("Gradia extension installed");
 });
 
 browser.runtime.onMessage.addListener(
-  (message: unknown): void | Promise<void> => {
+  async (message: unknown): Promise<void> => {
     if (!message || typeof message !== "object") return;
 
     const typedMessage = message as {
@@ -17,6 +18,7 @@ browser.runtime.onMessage.addListener(
       windowId?: number;
       passwordProtectionEnabled?: boolean;
       multiMonitor?: boolean;
+      multiMonitorWindowIds?: number[];
     };
 
     if (typedMessage.type === "SCREENSAVER_STARTED") {
@@ -27,6 +29,9 @@ browser.runtime.onMessage.addListener(
       passwordProtectionEnabled = Boolean(
         typedMessage.passwordProtectionEnabled
       );
+      if (Array.isArray(typedMessage.multiMonitorWindowIds)) {
+        multiMonitorWindowIds = typedMessage.multiMonitorWindowIds;
+      }
       return;
     }
 
@@ -36,6 +41,17 @@ browser.runtime.onMessage.addListener(
     }
 
     if (typedMessage.type === "UNLOCK_SCREENSAVER") {
+      // Close all multi-monitor windows if any exist
+      if (multiMonitorWindowIds.length > 0) {
+        for (const windowId of multiMonitorWindowIds) {
+          try {
+            await browser.windows.remove(windowId);
+          } catch {
+            // Window may already be closed, ignore
+          }
+        }
+        multiMonitorWindowIds = [];
+      }
       lockedWindowId = null;
       passwordProtectionEnabled = false;
       return;
@@ -44,6 +60,25 @@ browser.runtime.onMessage.addListener(
 );
 
 browser.windows.onRemoved.addListener(async (windowId) => {
+  // Check if this is one of the multi-monitor windows
+  if (multiMonitorWindowIds.includes(windowId)) {
+    // Close all other multi-monitor windows
+    for (const id of multiMonitorWindowIds) {
+      if (id !== windowId) {
+        try {
+          await browser.windows.remove(id);
+        } catch {
+          // Window may already be closed, ignore
+        }
+      }
+    }
+    multiMonitorWindowIds = [];
+    lockedWindowId = null;
+    passwordProtectionEnabled = false;
+    return;
+  }
+
+  // Handle single monitor case
   if (!passwordProtectionEnabled) return;
   if (lockedWindowId === null || windowId !== lockedWindowId) return;
 
@@ -106,11 +141,13 @@ async function startScreensaver(multiMonitor: boolean) {
       }
 
       if (windows.length > 0) {
+        multiMonitorWindowIds = windows;
         try {
           await browser.runtime.sendMessage({
             type: "SCREENSAVER_STARTED",
             windowId: windows[0],
             passwordProtectionEnabled: Boolean(passwordHash),
+            multiMonitorWindowIds: windows,
           });
         } catch {
           // Ignore message errors
