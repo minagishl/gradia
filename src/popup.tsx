@@ -162,11 +162,7 @@ function Popup() {
               )}
             </Field>
             <Field orientation="horizontal">
-              <Button
-                type="submit"
-                className="w-full cursor-pointer"
-                disabled={isSaving}
-              >
+              <Button type="submit" className="w-full" disabled={isSaving}>
                 {isSaving ? "Starting..." : "Start"}
               </Button>
             </Field>
