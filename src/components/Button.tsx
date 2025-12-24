@@ -15,20 +15,20 @@ interface ButtonProps {
   icon?: ReactNode;
 }
 
-const getBackgroundColor = (variant: ButtonProps["variant"]) => {
+const getVariantClasses = (variant: ButtonProps["variant"]) => {
   switch (variant) {
     case "danger":
-      return "#dc3545";
+      return "bg-red-600 hover:bg-red-700";
     case "warning":
-      return "#ff9800";
+      return "bg-orange-500 hover:bg-orange-600";
     case "other":
-      return "#4285f4";
+      return "bg-blue-500 hover:bg-blue-600";
     case "default":
-      return "#007bff";
+      return "bg-blue-600 hover:bg-blue-700";
     case "secondary":
-      return "#6c757d";
+      return "bg-gray-600 hover:bg-gray-700";
     default:
-      return "#4CAF50";
+      return "bg-green-600 hover:bg-green-700";
   }
 };
 
@@ -40,26 +40,18 @@ export const Button = ({
   minimize = false,
   icon,
 }: ButtonProps) => {
+  const baseClasses = "text-white border-none rounded flex items-center justify-center";
+  const variantClasses = getVariantClasses(variant);
+  const sizeClasses = minimize ? "p-2 w-9 h-9" : "py-2 px-4";
+  const gapClasses = minimize ? "" : "gap-2";
+  const stateClasses = disabled ? "opacity-70 cursor-not-allowed" : "cursor-pointer";
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      style={{
-        padding: minimize ? "8px" : "8px 16px",
-        backgroundColor: getBackgroundColor(variant),
-        color: "white",
-        border: "none",
-        borderRadius: "4px",
-        cursor: disabled ? "not-allowed" : "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: minimize ? "0" : "8px",
-        opacity: disabled ? 0.7 : 1,
-        width: minimize ? "36px" : "auto",
-        height: minimize ? "36px" : "auto",
-      }}
+      className={`${baseClasses} ${variantClasses} ${sizeClasses} ${gapClasses} ${stateClasses}`}
     >
       {minimize ? icon : children}
     </button>

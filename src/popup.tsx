@@ -33,15 +33,11 @@ function Popup() {
   };
 
   return (
-    <div style={{ padding: "16px" }}>
-      <h2 style={{ margin: "0 0 16px 0", fontSize: "18px" }}>
-        Screensaver Settings
-      </h2>
-
-      <div style={{ marginBottom: "16px" }}>
+    <div className="p-4">
+      <div className="mb-4">
         <label
           htmlFor="gradientPreset"
-          style={{ display: "block", marginBottom: "8px", fontSize: "14px" }}
+          className="block mb-2 text-sm"
         >
           Gradient Preset
         </label>
@@ -49,15 +45,7 @@ function Popup() {
           id="gradientPreset"
           value={selectedGradient}
           onChange={(e) => handleGradientChange(e.target.value)}
-          style={{
-            width: "100%",
-            height: "32px",
-            padding: "0 8px",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-            boxSizing: "border-box",
-            fontSize: "14px",
-          }}
+          className="w-full h-8 px-2 text-sm border border-gray-300 rounded box-border"
         >
           {GRADIENT_PRESETS.map((preset) => (
             <option key={preset.id} value={preset.id}>
@@ -67,7 +55,7 @@ function Popup() {
         </select>
       </div>
 
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div className="flex gap-2">
         <Button onClick={openScreensaver} variant="primary">
           Start Screensaver
         </Button>
