@@ -23,6 +23,8 @@ import {
   FieldDescription,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { hashPassword } from "@/lib/password";
 import { GRADIENT_PRESETS } from "./lib/gradients";
 
@@ -33,12 +35,14 @@ function Popup() {
   const [password, setPassword] = useState("");
   const [hasConfiguredPassword, setHasConfiguredPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [multiMonitor, setMultiMonitor] = useState(false);
 
   useEffect(() => {
     (async () => {
       const result = await browser.storage.local.get([
         "selectedGradient",
         "screensaverPasswordHash",
+        "multiMonitor",
       ]);
 
       if (result.selectedGradient) {
@@ -47,6 +51,10 @@ function Popup() {
 
       if (typeof result.screensaverPasswordHash === "string") {
         setHasConfiguredPassword(true);
+      }
+
+      if (typeof result.multiMonitor === "boolean") {
+        setMultiMonitor(result.multiMonitor);
       }
     })();
   }, []);
@@ -72,19 +80,13 @@ function Popup() {
         selectedGradient,
         screensaverPasswordHash: passwordHash,
         screensaverPasswordProtectionEnabled: Boolean(passwordHash),
-      });
-
-      const screensaverUrl = browser.runtime.getURL("src/main.html");
-      const createdWindow = await browser.windows.create({
-        url: screensaverUrl,
-        type: "popup",
-        state: "fullscreen",
+        multiMonitor,
       });
 
       await browser.runtime.sendMessage({
-        type: "SCREENSAVER_STARTED",
-        windowId: createdWindow.id,
+        type: "START_SCREENSAVER",
         passwordProtectionEnabled: Boolean(passwordHash),
+        multiMonitor,
       });
 
       if (passwordHash) {
@@ -160,6 +162,20 @@ function Popup() {
                   password will remove it for the next session.
                 </p>
               )}
+            </Field>
+            <Field orientation="horizontal">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="multiMonitor"
+                  checked={multiMonitor}
+                  onCheckedChange={(checked) =>
+                    setMultiMonitor(checked === true)
+                  }
+                />
+                <Label htmlFor="multiMonitor" className="text-sm font-normal">
+                  Start on all monitors
+                </Label>
+              </div>
             </Field>
             <Field orientation="horizontal">
               <Button type="submit" className="w-full" disabled={isSaving}>
