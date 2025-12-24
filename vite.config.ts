@@ -48,6 +48,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), crx({ manifest })],
   build: {
     minify: "terser",
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       input: {
         background: "src/background.ts",
