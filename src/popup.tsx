@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import browser from "webextension-polyfill";
-import { Button } from "./components/Button";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { GRADIENT_PRESETS } from "./types/gradients";
 
 function Popup() {
@@ -33,30 +41,26 @@ function Popup() {
   };
 
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <label htmlFor="gradientPreset" className="mb-2 block text-sm">
-          Gradient Preset
-        </label>
-        <select
-          id="gradientPreset"
-          value={selectedGradient}
-          onChange={(e) => handleGradientChange(e.target.value)}
-          className="box-border h-8 w-full rounded border border-gray-300 px-2 text-sm"
-        >
-          {GRADIENT_PRESETS.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.name}
-            </option>
-          ))}
-        </select>
+    <div className="min-h-48 p-4">
+      <div className="mb-4 space-y-2">
+        <Label htmlFor="gradientPreset">Gradient Preset</Label>
+        <Select value={selectedGradient} onValueChange={handleGradientChange}>
+          <SelectTrigger id="gradientPreset" className="w-full">
+            <SelectValue placeholder="Select a gradient" />
+          </SelectTrigger>
+          <SelectContent>
+            {GRADIENT_PRESETS.map((preset) => (
+              <SelectItem key={preset.id} value={preset.id}>
+                {preset.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="flex gap-2">
-        <Button onClick={openScreensaver} variant="primary">
-          Start Screensaver
-        </Button>
-      </div>
+      <Button onClick={openScreensaver} className="w-full cursor-pointer">
+        Start Screensaver
+      </Button>
     </div>
   );
 }
