@@ -9,6 +9,13 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +42,7 @@ function Screensaver() {
   const [isPromptOpen, setIsPromptOpen] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isDebugOpen, setIsDebugOpen] = useState(false);
 
   useEffect(() => {
     const originalWarn = console.warn;
@@ -101,7 +109,48 @@ function Screensaver() {
 
     browser.storage.onChanged.addListener(listener);
 
+    // KONAMI code sequence: ↑↑↓↓←→←→BA
+    const konamiSequence = [
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowLeft",
+      "ArrowRight",
+      "KeyB",
+      "KeyA",
+    ];
+    let konamiIndex = 0;
+    let konamiTimeout: number | null = null;
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for KONAMI code
+      if (konamiSequence[konamiIndex] === e.code) {
+        konamiIndex++;
+        if (konamiTimeout) {
+          clearTimeout(konamiTimeout);
+        }
+        konamiTimeout = window.setTimeout(() => {
+          konamiIndex = 0;
+        }, 2000);
+
+        if (konamiIndex === konamiSequence.length) {
+          konamiIndex = 0;
+          if (konamiTimeout) {
+            clearTimeout(konamiTimeout);
+          }
+          setIsDebugOpen(true);
+          return;
+        }
+      } else {
+        konamiIndex = 0;
+        if (konamiTimeout) {
+          clearTimeout(konamiTimeout);
+        }
+      }
+
       if (e.key !== "Escape") return;
 
       e.preventDefault();
@@ -123,6 +172,9 @@ function Screensaver() {
       console.warn = originalWarn;
       browser.storage.onChanged.removeListener(listener);
       window.removeEventListener("keydown", handleKeyDown);
+      if (konamiTimeout) {
+        clearTimeout(konamiTimeout);
+      }
     };
   }, [isPasswordProtectionEnabled]);
 
@@ -217,6 +269,114 @@ function Screensaver() {
               }}
             >
               Unlock and exit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isDebugOpen}
+        onOpenChange={(open) => {
+          setIsDebugOpen(open);
+        }}
+      >
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Debug Menu</DialogTitle>
+            <DialogDescription>
+              Current gradient preset information
+            </DialogDescription>
+          </DialogHeader>
+          <FieldGroup>
+            <Field>
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full cursor-pointer"
+              >
+                <AccordionItem value="json">
+                  <AccordionTrigger>Current Preset (JSON)</AccordionTrigger>
+                  <AccordionContent>
+                    <Textarea
+                      id="debugInfo"
+                      readOnly
+                      value={JSON.stringify(preset, null, 2)}
+                      className="min-h-[400px] resize-none font-mono text-xs"
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+              <FieldDescription>
+                Complete preset configuration in JSON format
+              </FieldDescription>
+            </Field>
+            <Field>
+              <FieldLabel>Preset Details</FieldLabel>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <strong>ID:</strong> {preset.id}
+                </div>
+                <div>
+                  <strong>Name:</strong> {preset.name}
+                </div>
+                <div>
+                  <strong>Type:</strong> {preset.props.type}
+                </div>
+                <div>
+                  <strong>Colors:</strong> {preset.props.color1},{" "}
+                  {preset.props.color2}, {preset.props.color3}
+                </div>
+                <div>
+                  <strong>Camera Distance:</strong> {preset.props.cDistance}
+                </div>
+                <div>
+                  <strong>Camera Zoom:</strong> {preset.props.cameraZoom}
+                </div>
+                <div>
+                  <strong>Camera Angles:</strong> Azimuth:{" "}
+                  {preset.props.cAzimuthAngle}°, Polar:{" "}
+                  {preset.props.cPolarAngle}°
+                </div>
+                <div>
+                  <strong>Position:</strong> X: {preset.props.positionX}, Y:{" "}
+                  {preset.props.positionY}, Z: {preset.props.positionZ}
+                </div>
+                <div>
+                  <strong>Rotation:</strong> X: {preset.props.rotationX}°, Y:{" "}
+                  {preset.props.rotationY}°, Z: {preset.props.rotationZ}°
+                </div>
+                <div>
+                  <strong>Brightness:</strong> {preset.props.brightness}
+                </div>
+                <div>
+                  <strong>Grain:</strong> {preset.props.grain}
+                </div>
+                <div>
+                  <strong>Light Type:</strong> {preset.props.lightType}
+                </div>
+                <div>
+                  <strong>Environment:</strong> {preset.props.envPreset}
+                </div>
+              </div>
+            </Field>
+          </FieldGroup>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(JSON.stringify(preset, null, 2));
+              }}
+            >
+              Copy JSON
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setIsDebugOpen(false);
+              }}
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
