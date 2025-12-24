@@ -10,8 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "lint:fix": "eslint . --ext ts,tsx --fix",
-    "format": "prettier --check \"src/**/*.{ts,tsx,json,css}\"",
-    "format:write": "prettier --write \"src/**/*.{ts,tsx,json,css}\""
+    "format": "prettier --check \"src/**/*.{ts,tsx,json,css,html}\"",
+    "format:write": "prettier --write \"src/**/*.{ts,tsx,json,css,html}\""
   },
   "keywords": [
     "education",
