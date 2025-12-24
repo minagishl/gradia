@@ -1,35 +1,33 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
+    <title>Gradia</title>
+    <script type="module" src="./lib/dark-mode.ts"></script>
+    <link href="./index.css" rel="stylesheet" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000 !important;
+        touch-action: none !important;
+        overscroll-behavior: none !important;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="google" content="notranslate">
-  <title>Gradia</title>
-  <script type="module" src="./lib/dark-mode.ts"></script>
-  <link href="./index.css" rel="stylesheet" />
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #000 !important;
-      touch-action: none !important;
-      overscroll-behavior: none !important;
-    }
+      #root {
+        width: 100dvw;
+        height: 100dvh;
+        touch-action: none !important;
+      }
+    </style>
+  </head>
 
-    #root {
-      width: 100dvw;
-      height: 100dvh;
-      touch-action: none !important;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="root"></div>
-  <script type="module" src="./main.tsx"></script>
-</body>
-
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
 </html>
