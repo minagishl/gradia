@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import browser from "webextension-polyfill";
-import { ScreensaverCanvas } from "./components/Canvas";
+import { ScreensaverCanvas } from "./components/canvas";
 import { GRADIENT_PRESETS, type GradientPreset } from "./types/gradients";
 
 function Screensaver() {
