@@ -27,9 +27,9 @@
     "@types/webextension-polyfill": "^0.12.3",
     "@vitejs/plugin-react": "^4.4.1",
     "archiver": "^7.0.1",
-    "terser": "^5.39.0",
+    "terser": "^5.44.1",
     "typescript": "5.8.3",
-    "vite": "6.3.4"
+    "vite": "7.3.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
