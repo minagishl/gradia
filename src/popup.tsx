@@ -12,7 +12,10 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -26,7 +29,13 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { hashPassword } from "@/lib/password";
-import { GRADIENT_PRESETS } from "./lib/gradients";
+import {
+  GRADIENT_PRESETS,
+  getAllPresets,
+  isCustomPreset,
+  type GradientPreset,
+} from "./lib/gradients";
+import { Settings } from "lucide-react";
 
 function Popup() {
   const [selectedGradient, setSelectedGradient] = useState(
@@ -36,9 +45,15 @@ function Popup() {
   const [hasConfiguredPassword, setHasConfiguredPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [multiMonitor, setMultiMonitor] = useState(false);
+  const [customPresets, setCustomPresets] = useState<GradientPreset[]>([]);
 
   useEffect(() => {
     (async () => {
+      // Load custom presets
+      const allPresets = await getAllPresets();
+      const customOnly = allPresets.filter((p) => isCustomPreset(p.id));
+      setCustomPresets(customOnly);
+
       const result = await browser.storage.local.get([
         "selectedGradient",
         "screensaverPasswordHash",
@@ -57,6 +72,23 @@ function Popup() {
         setMultiMonitor(result.multiMonitor);
       }
     })();
+
+    // Listen for custom preset changes
+    const listener = (
+      changes: { [key: string]: browser.Storage.StorageChange },
+      areaName: string
+    ) => {
+      if (areaName === "sync" && changes.customGradientPresets) {
+        (async () => {
+          const allPresets = await getAllPresets();
+          const customOnly = allPresets.filter((p) => isCustomPreset(p.id));
+          setCustomPresets(customOnly);
+        })();
+      }
+    };
+
+    browser.storage.onChanged.addListener(listener);
+    return () => browser.storage.onChanged.removeListener(listener);
   }, []);
 
   const handleGradientChange = async (gradientId: string) => {
@@ -103,10 +135,22 @@ function Popup() {
   return (
     <Card className="min-h-48 rounded-none">
       <CardHeader>
-        <CardTitle>Gradia</CardTitle>
-        <CardDescription>
-          Select a gradient preset and start the screensaver.
-        </CardDescription>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Gradia</CardTitle>
+            <CardDescription>
+              Select a gradient preset and start the screensaver.
+            </CardDescription>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => browser.runtime.openOptionsPage()}
+            className="shrink-0"
+          >
+            <Settings className="size-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <form
@@ -127,13 +171,37 @@ function Popup() {
                   <SelectValue placeholder="Select a gradient" />
                 </SelectTrigger>
                 <SelectContent>
-                  {GRADIENT_PRESETS.map((preset) => (
-                    <SelectItem key={preset.id} value={preset.id}>
-                      {preset.name}
+                  <SelectGroup>
+                    <SelectLabel>Built-in Presets</SelectLabel>
+                    {GRADIENT_PRESETS.map((preset) => (
+                      <SelectItem key={preset.id} value={preset.id}>
+                        {preset.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+
+                  {customPresets.length > 0 && (
+                    <>
+                      <SelectSeparator />
+                      <SelectGroup>
+                        <SelectLabel>Custom Presets</SelectLabel>
+                        {customPresets.map((preset) => (
+                          <SelectItem key={preset.id} value={preset.id}>
+                            {preset.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </>
+                  )}
+
+                  <SelectSeparator />
+                  <SelectGroup>
+                    <SelectLabel>Random Presets</SelectLabel>
+                    <SelectItem value="random-preset">
+                      Random (Preset)
                     </SelectItem>
-                  ))}
-                  <SelectItem value="random-preset">Random (Preset)</SelectItem>
-                  <SelectItem value="random-full">Random (Full)</SelectItem>
+                    <SelectItem value="random-full">Random (Full)</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <FieldDescription>

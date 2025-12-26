@@ -1027,3 +1027,19 @@ export function generateRandomPreset(): GradientPreset {
     },
   };
 }
+
+/**
+ * Get all gradient presets (built-in + custom)
+ */
+export async function getAllPresets(): Promise<GradientPreset[]> {
+  const { getCustomPresets } = await import("./custom-presets");
+  const customPresets = await getCustomPresets();
+  return [...GRADIENT_PRESETS, ...customPresets];
+}
+
+/**
+ * Check if a preset ID is a custom preset
+ */
+export function isCustomPreset(id: string): boolean {
+  return id.startsWith("custom-");
+}

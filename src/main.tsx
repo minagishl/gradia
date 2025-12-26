@@ -30,6 +30,7 @@ import {
   type GradientPreset,
   getRandomPresetFromExisting,
   generateRandomPreset,
+  getAllPresets,
 } from "./lib/gradients";
 import { hashPassword } from "./lib/password";
 
@@ -86,7 +87,9 @@ function Screensaver() {
         } else if (result.selectedGradient === "random-full") {
           setPreset(generateRandomPreset());
         } else {
-          const savedPreset = GRADIENT_PRESETS.find(
+          // Check both built-in and custom presets
+          const allPresets = await getAllPresets();
+          const savedPreset = allPresets.find(
             (p) => p.id === result.selectedGradient
           );
           if (savedPreset) {
@@ -117,12 +120,16 @@ function Screensaver() {
         } else if (changes.selectedGradient.newValue === "random-full") {
           setPreset(generateRandomPreset());
         } else {
-          const newPreset = GRADIENT_PRESETS.find(
-            (p) => p.id === changes.selectedGradient.newValue
-          );
-          if (newPreset) {
-            setPreset(newPreset);
-          }
+          // Check both built-in and custom presets
+          (async () => {
+            const allPresets = await getAllPresets();
+            const newPreset = allPresets.find(
+              (p) => p.id === changes.selectedGradient.newValue
+            );
+            if (newPreset) {
+              setPreset(newPreset);
+            }
+          })();
         }
       }
     };
