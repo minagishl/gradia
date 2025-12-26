@@ -23,15 +23,8 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build extension
-        run: bun run build
-
-      - name: Create Chrome zip
-        run: |
-          cp LICENSE README.md dist/
-          cd dist
-          zip -r ../chrome.zip .
-          cd ..
+      - name: Build and package extensions
+        run: bun run release
 
       - name: Create or Update Release
         id: create_release
@@ -41,6 +34,6 @@ jobs:
           name: ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: chrome.zip
+          files: release/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
