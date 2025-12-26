@@ -7,7 +7,7 @@ import path from "node:path";
 const manifest = defineManifest({
   manifest_version: 3,
   name: "Gradia",
-  version: "1.0.1",
+  version: "1.1.0",
   description:
     "A lightweight Chrome extension screensaver built with React, Vite, and Canvas.",
   author: { email: "minagishl@icloud.com" },

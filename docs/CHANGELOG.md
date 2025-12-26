@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-12-27
+
+### Added
+
+- Custom gradient preset management system:
+  - Create, edit, and delete custom gradient presets
+  - Full control over gradient colors, animation type, and visual parameters
+  - Import/export functionality for sharing custom presets
+  - Duplicate existing presets for quick customization
+- Dedicated options page (`chrome://extensions/?options=<extension-id>`):
+  - Manage custom gradient presets
+  - Visual preset editor with real-time preview
+  - Bulk export/import of custom presets
+- About page with project information:
+  - Automatic version display from manifest
+  - Credits and acknowledgments
+  - Quick links to GitHub repository and license
+- Context menu integration:
+  - Right-click menu for quick screensaver access
+  - Quick start with specific preset selection
+  - Direct access to Settings and About pages
+  - Available on both page context and extension icon
+- Husky pre-commit hooks:
+  - Automatic commit message linting with commitlint
+  - Ensures conventional commit format
+
+### Changed
+
+- Refactored codebase structure:
+  - Split `lib/gradients.ts` into `lib/preset.ts` for better organization
+  - Separated built-in presets from custom preset logic
+  - Improved code maintainability and readability
+- Version management:
+  - Automatic version retrieval from manifest file
+  - Single source of truth for version number
+- Updated popup UI to display custom presets alongside built-in presets
+- Enhanced preset selection with categorized groups (Built-in, Custom, Random)
+
+### Fixed
+
+- Improved type safety in gradient preset handling
+- Better error handling in custom preset operations
+
 ## [1.0.1] - 2024-12-26
 
 ### Added
@@ -77,7 +120,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README with installation, usage, and development guides
 - Added important notes about multi-monitor functionality
 
-[Unreleased]: https://github.com/minagishl/gradia/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/minagishl/gradia/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/minagishl/gradia/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/minagishl/gradia/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/minagishl/gradia/releases/tag/v1.0.0
 
