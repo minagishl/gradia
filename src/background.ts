@@ -1,5 +1,6 @@
 import browser from "webextension-polyfill";
 import logger from "./logger";
+import { BUILT_IN_PRESET_METADATA } from "./lib/preset";
 
 let lockedWindowId: number | null = null;
 let passwordProtectionEnabled = false;
@@ -7,6 +8,9 @@ let multiMonitorWindowIds: number[] = [];
 
 browser.runtime.onInstalled.addListener(() => {
   logger.info("Gradia extension installed");
+
+  // Create context menu items
+  void createContextMenus();
 });
 
 browser.runtime.onMessage.addListener(
@@ -180,5 +184,113 @@ browser.commands.onCommand.addListener(async (command) => {
     const result = await browser.storage.local.get(["multiMonitor"]);
     const multiMonitor = Boolean(result.multiMonitor);
     void startScreensaver(multiMonitor);
+  }
+});
+
+// Create context menus
+async function createContextMenus() {
+  try {
+    // Remove all existing menus first
+    await browser.contextMenus.removeAll();
+
+    // Main menu: Start screensaver
+    browser.contextMenus.create({
+      id: "start-screensaver",
+      title: "Start Screensaver",
+      contexts: ["page", "action"],
+    });
+
+    // Separator
+    browser.contextMenus.create({
+      id: "separator-1",
+      type: "separator",
+      contexts: ["page", "action"],
+    });
+
+    // Settings
+    browser.contextMenus.create({
+      id: "open-settings",
+      title: "Settings",
+      contexts: ["page", "action"],
+    });
+
+    // Separator
+    browser.contextMenus.create({
+      id: "separator-2",
+      type: "separator",
+      contexts: ["page", "action"],
+    });
+
+    // Quick start with specific presets (parent menu)
+    browser.contextMenus.create({
+      id: "quick-start",
+      title: "Quick Start with Preset",
+      contexts: ["page", "action"],
+    });
+
+    // Add built-in presets
+    for (const preset of BUILT_IN_PRESET_METADATA) {
+      browser.contextMenus.create({
+        id: `preset-${preset.id}`,
+        parentId: "quick-start",
+        title: preset.name,
+        contexts: ["page", "action"],
+      });
+    }
+
+    // Add random options
+    browser.contextMenus.create({
+      id: "separator-preset",
+      parentId: "quick-start",
+      type: "separator",
+      contexts: ["page", "action"],
+    });
+
+    browser.contextMenus.create({
+      id: "preset-random-preset",
+      parentId: "quick-start",
+      title: "Random (Preset)",
+      contexts: ["page", "action"],
+    });
+
+    browser.contextMenus.create({
+      id: "preset-random-full",
+      parentId: "quick-start",
+      title: "Random (Full)",
+      contexts: ["page", "action"],
+    });
+
+    logger.info("Context menus created successfully");
+  } catch (error) {
+    logger.error(`Failed to create context menus: ${String(error)}`);
+  }
+}
+
+// Handle context menu clicks
+browser.contextMenus.onClicked.addListener(async (info) => {
+  try {
+    if (info.menuItemId === "start-screensaver") {
+      const result = await browser.storage.local.get(["multiMonitor"]);
+      const multiMonitor = Boolean(result.multiMonitor);
+      void startScreensaver(multiMonitor);
+    } else if (info.menuItemId === "open-settings") {
+      await browser.runtime.openOptionsPage();
+    } else if (
+      typeof info.menuItemId === "string" &&
+      info.menuItemId.startsWith("preset-")
+    ) {
+      // Extract preset ID
+      const presetId = info.menuItemId.replace("preset-", "");
+
+      // Save the selected preset
+      await browser.storage.local.set({ selectedGradient: presetId });
+
+      // Start screensaver with the selected preset
+      const result = await browser.storage.local.get(["multiMonitor"]);
+      const multiMonitor = Boolean(result.multiMonitor);
+      void startScreensaver(multiMonitor);
+    }
+  } catch (error) {
+    logger.error(`Failed to handle context menu click: ${String(error)}`);
   }
 });
