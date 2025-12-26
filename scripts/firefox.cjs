@@ -4,9 +4,9 @@ const archiver = require("archiver");
 
 (async () => {
   try {
-    // Ensure dist directory exists (should be built with pnpm build first)
+    // Ensure dist directory exists (should be built with bun run build first)
     if (!fs.existsSync("./dist")) {
-      console.error("dist directory not found. Run 'pnpm build' first.");
+      console.error("dist directory not found. Run 'bun run build' first.");
       process.exit(1);
     }
 

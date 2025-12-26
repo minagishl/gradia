@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:firefox": "pnpm build && node scripts/firefox.cjs",
+    "build:firefox": "bun run build && node scripts/firefox.cjs",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "lint:fix": "eslint . --ext ts,tsx --fix",
@@ -20,7 +20,6 @@
   ],
   "author": "minagishl",
   "license": "MIT",
-  "packageManager": "pnpm@10.10.0",
   "devDependencies": {
     "@crxjs/vite-plugin": "2.0.0-beta.32",
     "@eslint/js": "^9.39.2",
@@ -45,11 +44,6 @@
     "typescript": "5.8.3",
     "typescript-eslint": "^8.50.1",
     "vite": "7.3.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",

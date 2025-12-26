@@ -4,3 +4,4 @@ npm-debug.log
 yarn-error.log
 .DS_Store
 pnpm-lock.yaml
+bun.lock

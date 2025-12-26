@@ -41,20 +41,20 @@ Gradia is a lightweight Chrome extension screensaver built with React, Vite, and
 ### Prerequisites
 
 - Node.js 20 or higher
-- pnpm package manager
+- bun package manager
 
 ### Build Instructions
 
 Install dependencies:
 
 ```bash
-pnpm install
+bun install
 ```
 
 Build the extension:
 
 ```bash
-pnpm build
+bun run build
 ```
 
 ### Chrome Installation
@@ -142,23 +142,23 @@ To make it harder to close the screensaver using the browser window controls whi
 ```bash
 git clone https://github.com/minagishl/gradia.git
 cd gradia
-pnpm install
+bun install
 ```
 
 2. Build for production:
 
 ```bash
-pnpm build
+bun run build
 ```
 
 ### Code Quality
 
 ```bash
 # Type checking
-pnpm build
+bun run build
 
 # Linting
-pnpm lint
+bun run lint
 ```
 
 ### Project Structure
@@ -216,9 +216,9 @@ The screensaver uses a multi-layer gradient system:
 Contributions are welcome! If you'd like to improve Gradia, please follow these steps:
 
 1. **Fork the repository** and create your feature branch (`git checkout -b feature/my-new-feature`).
-2. **Install dependencies** with `pnpm install`.
+2. **Install dependencies** with `bun install`.
 3. **Make your changes**, following the existing code style.
-4. **Run linter and build** to ensure everything works (`pnpm run biome` and `pnpm build`).
+4. **Run linter and build** to ensure everything works (`bun run lint` and `bun run build`).
 5. **Commit your changes** (`git commit -am 'feat: add new feature'`).
 6. **Push to your fork** (`git push origin feature/my-new-feature`).
 7. **Open a Pull Request** describing your changes.
