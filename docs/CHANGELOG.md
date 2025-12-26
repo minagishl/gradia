@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full control over gradient colors, animation type, and visual parameters
   - Import/export functionality for sharing custom presets
   - Duplicate existing presets for quick customization
-- Dedicated options page (`chrome://extensions/?options=<extension-id>`):
+- Dedicated options page:
   - Manage custom gradient presets
   - Visual preset editor with real-time preview
   - Bulk export/import of custom presets
