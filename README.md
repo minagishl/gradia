@@ -14,13 +14,13 @@ A beautiful animated gradient screensaver for Chrome as an extension.
 
 ## introduction
 
-Gradia is a lightweight Chrome extension screensaver built with React, Vite, and Canvas. Features beautiful animated gradient visualizations that transform your browser into a mesmerizing display.
+Gradia is a lightweight Chrome extension screensaver built with React, Vite, and WebGL shader gradients. Features beautiful animated gradient visualizations that transform your browser into a mesmerizing display.
 
 ## Features
 
 - **10 Stunning Gradient Presets**: Choose from Aurora Borealis, Cosmic Nebula, Galaxy Swirl, and more
-- **Advanced Animations**: Multi-layer radial gradients with wave-like motion and dynamic color positioning
-- **Smooth Performance**: Hardware-accelerated Canvas rendering with blend modes
+- **Advanced Animations**: WebGL-based shader gradients with dynamic 3D camera movements and color transitions
+- **Smooth Performance**: Hardware-accelerated WebGL rendering with adaptive pixel density
 - **Simple Controls**: Launch with one click or keyboard shortcut, exit with Escape key
 - **Keyboard Shortcut**: Quick launch with `Ctrl+Shift+S` (Windows/Linux) or `Command+Shift+S` (Mac)
 - **Multi-Monitor Support**: Option to start screensaver on all connected monitors simultaneously
@@ -30,9 +30,10 @@ Gradia is a lightweight Chrome extension screensaver built with React, Vite, and
 
 ## Tech Stack
 
-- React 19 + TypeScript
-- Vite for fast development and builds
-- HTML5 Canvas for rendering
+- [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/) for fast development and builds
+- [@shadergradient/react](https://github.com/ruucm/shadergradient) for WebGL-based shader gradient rendering
+- [Three.js](https://threejs.org/) + [React Three Fiber](https://github.com/pmndrs/react-three-fiber) for 3D graphics
 - Chrome Extension Manifest V3
 - Modern web extension APIs
 
@@ -167,20 +168,21 @@ bun run lint
 gradia/
 ├── src/
 │   ├── components/
-│   │   ├── Button.tsx            # Reusable button component
-│   │   └── ScreensaverCanvas.tsx # Main canvas animation
-│   ├── types/
-│   │   └── gradients.ts          # Gradient presets and types
+│   │   ├── canvas.tsx            # WebGL shader gradient canvas component
+│   │   └── ui/                   # Reusable UI components
+│   ├── lib/
+│   │   ├── gradients.ts          # Gradient presets and types
+│   │   └── password.ts           # Password hashing utilities
 │   ├── background.ts             # Extension background script
 │   ├── popup.tsx                 # Popup interface
 │   ├── popup.html                # Popup HTML
 │   ├── main.tsx                  # Screensaver page logic
-│   ├── main.html                 # Screensaver HTML
-│   └── logger.ts                 # Logging utility
+│   └── main.html                 # Screensaver HTML
 ├── dist/                         # Build output
+├── scripts/
+│   └── firefox.cjs               # Firefox build script
 ├── vite.config.ts                # Vite configuration
 ├── tsconfig.json                 # TypeScript configuration
-├── biome.json                    # Biome linter configuration
 └── package.json                  # Project dependencies
 ```
 
@@ -188,20 +190,20 @@ gradia/
 
 ### Animation System
 
-The screensaver uses a multi-layer gradient system:
+The screensaver uses [@shadergradient/react](https://github.com/ruucm/shadergradient) for WebGL-based shader gradient rendering:
 
-1. **Multiple Layers**: Each preset contains 2-3 gradient layers
-2. **Radial Gradients**: Creates natural, organic color spreads
-3. **Wave Motion**: Gradient centers move in circular patterns using sine/cosine functions
-4. **Dynamic Sizing**: Radii oscillate to create breathing effects
-5. **Color Animation**: Color stops shift positions over time
-6. **Blend Modes**: Layers use "screen" blend mode for ethereal effects
+1. **WebGL Shaders**: Hardware-accelerated gradient rendering using custom GLSL shaders
+2. **Three.js Scene**: 3D scene management with optimized rendering pipeline
+3. **Dynamic Properties**: Each preset defines camera position, rotation, colors, lighting, and animation parameters
+4. **Adaptive Pixel Density**: Automatically adjusts rendering resolution based on screen size and orientation for optimal performance
+5. **React Three Fiber**: Declarative 3D rendering with React components
+6. **Real-time Animation**: Smooth gradient transitions and movements powered by WebGL
 
 ### Performance
 
-- Uses `requestAnimationFrame` for smooth 60fps animations
-- Canvas operations are optimized for minimal redraws
-- Gradient calculations cached per frame
+- WebGL-based shader rendering for hardware-accelerated graphics
+- Optimized Three.js scene with efficient gradient calculations
+- Dynamic pixel density adjustment based on screen size and orientation
 - Efficient event handling with proper cleanup
 
 ## Browser Support
