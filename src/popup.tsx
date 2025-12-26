@@ -132,7 +132,8 @@ function Popup() {
                       {preset.name}
                     </SelectItem>
                   ))}
-                  <SelectItem value="random">Random</SelectItem>
+                  <SelectItem value="random-preset">Random (Preset)</SelectItem>
+                  <SelectItem value="random-full">Random (Full)</SelectItem>
                 </SelectContent>
               </Select>
               <FieldDescription>

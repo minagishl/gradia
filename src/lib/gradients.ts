@@ -846,6 +846,12 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Select a random preset from existing presets
+export function getRandomPresetFromExisting(): GradientPreset {
+  const randomIndex = randomInt(0, GRADIENT_PRESETS.length - 1);
+  return GRADIENT_PRESETS[randomIndex];
+}
+
 // Generate a random gradient preset
 export function generateRandomPreset(): GradientPreset {
   const types = ["plane", "sphere", "waterPlane"] as const;

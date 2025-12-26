@@ -28,6 +28,7 @@ import { ScreensaverCanvas } from "./components/canvas";
 import {
   GRADIENT_PRESETS,
   type GradientPreset,
+  getRandomPresetFromExisting,
   generateRandomPreset,
 } from "./lib/gradients";
 import { hashPassword } from "./lib/password";
@@ -80,7 +81,9 @@ function Screensaver() {
       ]);
 
       if (result.selectedGradient) {
-        if (result.selectedGradient === "random") {
+        if (result.selectedGradient === "random-preset") {
+          setPreset(getRandomPresetFromExisting());
+        } else if (result.selectedGradient === "random-full") {
           setPreset(generateRandomPreset());
         } else {
           const savedPreset = GRADIENT_PRESETS.find(
@@ -109,7 +112,9 @@ function Screensaver() {
       [key: string]: browser.Storage.StorageChange;
     }) => {
       if (changes.selectedGradient) {
-        if (changes.selectedGradient.newValue === "random") {
+        if (changes.selectedGradient.newValue === "random-preset") {
+          setPreset(getRandomPresetFromExisting());
+        } else if (changes.selectedGradient.newValue === "random-full") {
           setPreset(generateRandomPreset());
         } else {
           const newPreset = GRADIENT_PRESETS.find(
