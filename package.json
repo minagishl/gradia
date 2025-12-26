@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:firefox": "bun run build && node scripts/firefox.cjs",
-    "release": "node scripts/release.cjs",
+    "build:firefox": "bun run build && bun scripts/firefox.mjs",
+    "release": "bun scripts/release.mjs",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "lint:fix": "eslint . --ext ts,tsx --fix",

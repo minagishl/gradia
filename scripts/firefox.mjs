@@ -1,6 +1,25 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const archiver = require("archiver");
+import fs from "node:fs";
+import path from "node:path";
+import archiver from "archiver";
+
+// Helper function to copy directories recursively
+function copyDirectoryRecursively(src, dest) {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+
+  const files = fs.readdirSync(src);
+  for (const file of files) {
+    const srcPath = path.join(src, file);
+    const destPath = path.join(dest, file);
+
+    if (fs.statSync(srcPath).isDirectory()) {
+      copyDirectoryRecursively(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
 
 (async () => {
   try {
@@ -108,22 +127,3 @@ const archiver = require("archiver");
     process.exit(1);
   }
 })();
-
-// Helper function to copy directories recursively
-function copyDirectoryRecursively(src, dest) {
-  if (!fs.existsSync(dest)) {
-    fs.mkdirSync(dest, { recursive: true });
-  }
-
-  const files = fs.readdirSync(src);
-  for (const file of files) {
-    const srcPath = path.join(src, file);
-    const destPath = path.join(dest, file);
-
-    if (fs.statSync(srcPath).isDirectory()) {
-      copyDirectoryRecursively(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-    }
-  }
-}
