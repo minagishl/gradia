@@ -25,9 +25,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScreensaverCanvas } from "./components/canvas";
+import { GRADIENT_PRESETS, type GradientPreset } from "./lib/preset";
 import {
-  GRADIENT_PRESETS,
-  type GradientPreset,
   getRandomPresetFromExisting,
   generateRandomPreset,
   getAllPresets,

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { GradientPreset } from "@/lib/gradients";
-import { GRADIENT_PRESETS } from "@/lib/gradients";
+import type { GradientPreset } from "@/lib/preset";
+import { GRADIENT_PRESETS } from "@/lib/preset";
 import {
   Accordion,
   AccordionContent,

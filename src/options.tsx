@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import browser from "webextension-polyfill";
-import type { GradientPreset } from "@/lib/gradients";
+import type { GradientPreset } from "@/lib/preset";
 import {
   getCustomPresets,
   saveCustomPreset,

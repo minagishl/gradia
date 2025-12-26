@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
-import type { GradientPreset } from "../lib/gradients";
+import type { GradientPreset } from "../lib/preset";
 
 interface ScreensaverCanvasProps {
   preset: GradientPreset;

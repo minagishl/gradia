@@ -29,12 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { hashPassword } from "@/lib/password";
-import {
-  GRADIENT_PRESETS,
-  getAllPresets,
-  isCustomPreset,
-  type GradientPreset,
-} from "./lib/gradients";
+import { GRADIENT_PRESETS, type GradientPreset } from "./lib/preset";
+import { getAllPresets, isCustomPreset } from "./lib/gradients";
 import { Settings } from "lucide-react";
 
 function Popup() {

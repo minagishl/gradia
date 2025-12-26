@@ -1,6 +1,6 @@
 import { z } from "zod";
 import browser from "webextension-polyfill";
-import type { GradientPreset } from "./gradients";
+import type { GradientPreset } from "./preset";
 
 // Storage key for custom presets
 const CUSTOM_PRESETS_KEY = "customGradientPresets";
