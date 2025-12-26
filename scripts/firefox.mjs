@@ -3,7 +3,7 @@ import path from "node:path";
 import archiver from "archiver";
 
 // Helper function to copy directories recursively
-function copyDirectoryRecursively(src, dest) {
+async function copyDirectoryRecursively(src, dest) {
   if (!fs.existsSync(dest)) {
     fs.mkdirSync(dest, { recursive: true });
   }
@@ -14,9 +14,9 @@ function copyDirectoryRecursively(src, dest) {
     const destPath = path.join(dest, file);
 
     if (fs.statSync(srcPath).isDirectory()) {
-      copyDirectoryRecursively(srcPath, destPath);
+      await copyDirectoryRecursively(srcPath, destPath);
     } else {
-      fs.copyFileSync(srcPath, destPath);
+      await Bun.write(destPath, Bun.file(srcPath));
     }
   }
 }
@@ -36,8 +36,7 @@ function copyDirectoryRecursively(src, dest) {
     const manifestPath = "./dist/manifest.json";
     const firefoxManifestPath = "./dist/firefox/manifest.json";
 
-    const data = fs.readFileSync(manifestPath, "utf8");
-    const manifest = JSON.parse(data);
+    const manifest = await Bun.file(manifestPath).json();
 
     // Add Firefox-specific settings
     manifest.browser_specific_settings = {
@@ -64,11 +63,7 @@ function copyDirectoryRecursively(src, dest) {
       manifest.content_scripts[0] = contentScript;
     }
 
-    fs.writeFileSync(
-      firefoxManifestPath,
-      JSON.stringify(manifest, null, 2),
-      "utf8"
-    );
+    await Bun.write(firefoxManifestPath, JSON.stringify(manifest, null, 2));
 
     // Copy all other files from dist to firefox directory
     const distFiles = fs.readdirSync("./dist");
@@ -79,10 +74,10 @@ function copyDirectoryRecursively(src, dest) {
 
         if (fs.statSync(srcPath).isDirectory()) {
           // Copy directory recursively
-          copyDirectoryRecursively(srcPath, destPath);
+          await copyDirectoryRecursively(srcPath, destPath);
         } else {
           // Copy file
-          fs.copyFileSync(srcPath, destPath);
+          await Bun.write(destPath, Bun.file(srcPath));
         }
       }
     }

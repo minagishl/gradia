@@ -1,22 +1,24 @@
-import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
 const RELEASE_DIR = "release";
 
-function exec(command, description) {
+async function exec(command, description) {
   console.log(`\n${description}...`);
-  try {
-    execSync(command, { stdio: "inherit" });
-  } catch {
+  const proc = Bun.spawn(["sh", "-c", command], {
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  const exitCode = await proc.exited;
+  if (exitCode !== 0) {
     console.error(`Failed: ${description}`);
     process.exit(1);
   }
 }
 
-function getFileSize(filePath) {
-  const stats = fs.statSync(filePath);
-  const mb = (stats.size / (1024 * 1024)).toFixed(2);
+async function getFileSize(filePath) {
+  const size = await Bun.file(filePath).size;
+  const mb = (size / (1024 * 1024)).toFixed(2);
   return `${mb} MB`;
 }
 
@@ -29,24 +31,24 @@ function getFileSize(filePath) {
     fs.mkdirSync(RELEASE_DIR, { recursive: true });
 
     // Build extension
-    exec("bun run build", "Building extension");
+    await exec("bun run build", "Building extension");
 
     // Create Firefox zip
-    exec("bun run build:firefox", "Creating Firefox zip");
+    await exec("bun run build:firefox", "Creating Firefox zip");
     if (fs.existsSync("dist/firefox.zip")) {
       fs.renameSync("dist/firefox.zip", path.join(RELEASE_DIR, "firefox.zip"));
     }
 
     // Copy LICENSE and README.md to dist for Chrome zip
     if (fs.existsSync("LICENSE")) {
-      fs.copyFileSync("LICENSE", "dist/LICENSE");
+      await Bun.write("dist/LICENSE", Bun.file("LICENSE"));
     }
     if (fs.existsSync("README.md")) {
-      fs.copyFileSync("README.md", "dist/README.md");
+      await Bun.write("dist/README.md", Bun.file("README.md"));
     }
 
     // Create Chrome zip
-    exec(
+    await exec(
       `cd dist && zip -r ../${RELEASE_DIR}/chrome.zip . && cd ..`,
       "Creating Chrome zip"
     );
@@ -61,10 +63,10 @@ function getFileSize(filePath) {
 
     console.log("\n✓ Build complete!");
     console.log(
-      `  - firefox.zip: ${getFileSize(path.join(RELEASE_DIR, "firefox.zip"))}`
+      `  - firefox.zip: ${await getFileSize(path.join(RELEASE_DIR, "firefox.zip"))}`
     );
     console.log(
-      `  - chrome.zip: ${getFileSize(path.join(RELEASE_DIR, "chrome.zip"))}`
+      `  - chrome.zip: ${await getFileSize(path.join(RELEASE_DIR, "chrome.zip"))}`
     );
   } catch (error) {
     console.error("Build failed:", error);
