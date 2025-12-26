@@ -39,12 +39,22 @@ Gradia is a lightweight Chrome extension screensaver built with React, Vite, and
 
 ## Installation
 
-### Prerequisites
+### From Chrome Web Store
+
+The easiest way to install Gradia is directly from the Chrome Web Store:
+
+[Install Gradia from Chrome Web Store](https://chromewebstore.google.com/detail/hnlbjepmcmlmclkpmpdnbkbhfebpfmeg)
+
+### From Source
+
+For developers or advanced users who want to build from source:
+
+#### Prerequisites
 
 - Node.js 20 or higher
 - bun package manager
 
-### Build Instructions
+#### Build Instructions
 
 Install dependencies:
 
@@ -58,7 +68,7 @@ Build the extension:
 bun run build
 ```
 
-### Chrome Installation
+#### Chrome Installation
 
 1. Clone this repository
 2. Build the extension using the commands above
@@ -68,7 +78,7 @@ bun run build
 6. Select the `dist` folder from the cloned repository
 7. The extension icon will appear in your toolbar
 
-### Edge Installation
+#### Edge Installation
 
 1. Clone this repository
 2. Build the extension using the commands above
