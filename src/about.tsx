@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import browser from "webextension-polyfill";
 import {
   Card,
   CardContent,
@@ -12,7 +13,7 @@ import { Github, Shield, User } from "lucide-react";
 import { BUILT_IN_PRESET_METADATA } from "@/lib/preset";
 
 function AboutPage() {
-  const version = "1.0.1";
+  const version = browser.runtime.getManifest().version;
   const author = "Minagishl";
   const githubUrl = "https://github.com/minagishl/gradia";
   const licenseUrl = `${githubUrl}/blob/main/LICENSE`;
