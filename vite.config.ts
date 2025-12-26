@@ -56,6 +56,7 @@ export default defineConfig({
         popup: "src/popup.html",
         screensaver: "src/main.html",
         options: "src/options.html",
+        about: "src/about.html",
       },
     },
   },

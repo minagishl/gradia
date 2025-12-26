@@ -214,6 +214,13 @@ async function createContextMenus() {
       contexts: ["page", "action"],
     });
 
+    // About
+    browser.contextMenus.create({
+      id: "open-about",
+      title: "About",
+      contexts: ["page", "action"],
+    });
+
     // Separator
     browser.contextMenus.create({
       id: "separator-2",
@@ -275,6 +282,10 @@ browser.contextMenus.onClicked.addListener(async (info) => {
       void startScreensaver(multiMonitor);
     } else if (info.menuItemId === "open-settings") {
       await browser.runtime.openOptionsPage();
+    } else if (info.menuItemId === "open-about") {
+      await browser.tabs.create({
+        url: browser.runtime.getURL("src/about.html"),
+      });
     } else if (
       typeof info.menuItemId === "string" &&
       info.menuItemId.startsWith("preset-")
