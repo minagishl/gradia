@@ -12,7 +12,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "format": "prettier --check \"src/**/*.{ts,tsx,json,css,html}\"",
-    "format:write": "prettier --write \"src/**/*.{ts,tsx,json,css,html}\""
+    "format:write": "prettier --write \"src/**/*.{ts,tsx,json,css,html}\"",
+    "prepare": "husky"
   },
   "keywords": [
     "education",
@@ -22,6 +23,8 @@
   "author": "minagishl",
   "license": "MIT",
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@crxjs/vite-plugin": "2.0.0-beta.32",
     "@eslint/js": "^9.39.2",
     "@tailwindcss/vite": "^4.1.18",
@@ -38,6 +41,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "husky": "^9.1.7",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.1.18",
