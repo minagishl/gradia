@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2024-12-26
+
+### Added
+
+- 2 new gradient presets:
+  - Cherry Blossom: Soft pink gradient inspired by cherry blossoms with waterPlane animation
+  - Emerald: Rich green gradient with emerald tones and sphere animation
+- Dual random selection modes:
+  - Random (Preset): Randomly selects from existing preset gradients
+  - Random (Full): Generates completely random gradients with unique colors and parameters
+- Chrome Web Store installation instructions in README
+- `getRandomPresetFromExisting()` helper function for preset-based randomization
+
+### Changed
+
+- Migrated build system from pnpm to bun for faster installation and builds
+- Converted build scripts from CommonJS (.cjs) to ES modules (.mjs)
+- Updated README with clearer installation instructions including Chrome Web Store option
+- Optimized CI/CD build workflow for better performance
+- Unified and streamlined release process
+- Refactored gradient selection logic to support multiple random modes
+- Improved TypeScript type safety in gradient handling
+- Updated project dependencies to latest versions
+
 ## [1.0.0] - 2024-12-25
 
 ### Added
@@ -53,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README with installation, usage, and development guides
 - Added important notes about multi-monitor functionality
 
-[Unreleased]: https://github.com/minagishl/gradia/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/minagishl/gradia/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/minagishl/gradia/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/minagishl/gradia/releases/tag/v1.0.0
 

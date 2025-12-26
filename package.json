@@ -1,6 +1,6 @@
 {
   "name": "gradia",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight Chrome extension screensaver built with React, Vite, and Canvas.",
   "type": "module",
   "scripts": {
