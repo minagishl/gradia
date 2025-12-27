@@ -343,14 +343,21 @@ async function createContextMenus() {
     const currentDefault = await getCurrentDefaultPreset();
     const { builtInPresets, customPresets } = splitPresets(allPresets);
 
+    // Get current mouse hiding state
+    const result = await browser.storage.local.get(["hideMouse"]);
+    const hideMouse = Boolean(result.hideMouse);
+
     const rootMenus: ContextMenuCreateProperties[] = [
       { id: "start-screensaver", title: "Start Screensaver" },
       { id: "separator-1", type: "separator" },
       { id: "open-settings", title: "Settings" },
       { id: "open-about", title: "About" },
+      {
+        id: "toggle-hide-mouse",
+        title: formatCheckedTitle("Hide Mouse", hideMouse),
+      },
       { id: "separator-2", type: "separator" },
       { id: "quick-start", title: "Quick Start with Preset" },
-      { id: "separator-3", type: "separator" },
       { id: "set-default", title: "Set as Default" },
     ];
 
@@ -380,7 +387,7 @@ async function createContextMenus() {
 
     // Change Running Preset menu (only if screensaver is running)
     if (isScreensaverRunning()) {
-      createSeparator("separator-4");
+      createSeparator("separator-3");
       createMenu({ id: "change-running", title: "Change Running Preset" });
       createPresetMenuGroup({
         parentId: "change-running",
@@ -412,6 +419,17 @@ browser.contextMenus.onClicked.addListener(async (info) => {
       await browser.tabs.create({
         url: browser.runtime.getURL("src/about.html"),
       });
+    } else if (menuItemId === "toggle-hide-mouse") {
+      // Toggle mouse hiding state
+      const result = await browser.storage.local.get(["hideMouse"]);
+      const currentState = Boolean(result.hideMouse);
+      const newState = !currentState;
+      await browser.storage.local.set({ hideMouse: newState });
+
+      // Recreate menus to update the checkmark
+      void createContextMenus();
+
+      logger.info(`Mouse hiding ${newState ? "enabled" : "disabled"}`);
     } else if (typeof menuItemId !== "string") {
       return;
     } else if (menuItemId.startsWith("preset-")) {

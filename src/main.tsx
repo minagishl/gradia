@@ -45,6 +45,45 @@ function Screensaver() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isDebugOpen, setIsDebugOpen] = useState(false);
 
+  // Handle mouse hiding
+  useEffect(() => {
+    const applyMouseHiding = (shouldHide: boolean) => {
+      if (shouldHide) {
+        document.body.style.cursor = "none";
+        document.documentElement.style.cursor = "none";
+      } else {
+        document.body.style.cursor = "";
+        document.documentElement.style.cursor = "";
+      }
+    };
+
+    // Load initial state
+    (async () => {
+      const result = await browser.storage.local.get(["hideMouse"]);
+      const shouldHide = Boolean(result.hideMouse);
+      applyMouseHiding(shouldHide);
+    })();
+
+    // Listen for storage changes
+    const listener = (changes: {
+      [key: string]: browser.Storage.StorageChange;
+    }) => {
+      if (changes.hideMouse) {
+        const shouldHide = Boolean(changes.hideMouse.newValue);
+        applyMouseHiding(shouldHide);
+      }
+    };
+
+    browser.storage.onChanged.addListener(listener);
+
+    return () => {
+      browser.storage.onChanged.removeListener(listener);
+      // Reset cursor on cleanup
+      document.body.style.cursor = "";
+      document.documentElement.style.cursor = "";
+    };
+  }, []);
+
   useEffect(() => {
     const originalWarn = console.warn;
     const originalError = console.error;
