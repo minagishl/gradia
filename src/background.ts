@@ -7,6 +7,135 @@ let lockedWindowId: number | null = null;
 let passwordProtectionEnabled = false;
 let multiMonitorWindowIds: number[] = [];
 
+type PresetMenuItem = {
+  id: string;
+  name: string;
+};
+
+type ContextMenuCreateProperties = Parameters<
+  typeof browser.contextMenus.create
+>[0];
+
+const MENU_CONTEXTS: NonNullable<ContextMenuCreateProperties["contexts"]> = [
+  "page",
+  "action",
+];
+const RANDOM_MENU_ITEMS = [
+  { id: "random-preset", title: "Random (Preset)" },
+  { id: "random-full", title: "Random (Full)" },
+];
+
+function createMenu(item: ContextMenuCreateProperties) {
+  browser.contextMenus.create({
+    ...item,
+    contexts: item.contexts ?? MENU_CONTEXTS,
+  });
+}
+
+function createSeparator(id: string, parentId?: string) {
+  createMenu({ id, type: "separator", parentId });
+}
+
+function formatCheckedTitle(title: string, checked: boolean) {
+  return checked ? `✓ ${title}` : title;
+}
+
+function createPresetItems(
+  parentId: string,
+  presets: PresetMenuItem[],
+  idPrefix: string,
+  titleForPreset: (preset: PresetMenuItem) => string
+) {
+  for (const preset of presets) {
+    createMenu({
+      id: `${idPrefix}${preset.id}`,
+      parentId,
+      title: titleForPreset(preset),
+    });
+  }
+}
+
+function createRandomItems(
+  parentId: string,
+  idPrefix: string,
+  titleForItem: (item: (typeof RANDOM_MENU_ITEMS)[number]) => string
+) {
+  for (const item of RANDOM_MENU_ITEMS) {
+    createMenu({
+      id: `${idPrefix}${item.id}`,
+      parentId,
+      title: titleForItem(item),
+    });
+  }
+}
+
+function createPresetMenuGroup({
+  parentId,
+  builtInPresets,
+  customPresets,
+  idPrefix,
+  titleForPreset,
+  titleForRandom,
+}: {
+  parentId: string;
+  builtInPresets: PresetMenuItem[];
+  customPresets: PresetMenuItem[];
+  idPrefix: string;
+  titleForPreset: (preset: PresetMenuItem) => string;
+  titleForRandom: (item: (typeof RANDOM_MENU_ITEMS)[number]) => string;
+}) {
+  createPresetItems(parentId, builtInPresets, idPrefix, titleForPreset);
+
+  if (customPresets.length > 0) {
+    createSeparator(`separator-${parentId}-custom`, parentId);
+    createPresetItems(parentId, customPresets, idPrefix, titleForPreset);
+  }
+
+  createSeparator(`separator-${parentId}-random`, parentId);
+  createRandomItems(parentId, idPrefix, titleForRandom);
+}
+
+function splitPresets(presets: PresetMenuItem[]) {
+  const builtInPresets: PresetMenuItem[] = [];
+  const customPresets: PresetMenuItem[] = [];
+
+  for (const preset of presets) {
+    if (preset.id.startsWith("custom-")) {
+      customPresets.push(preset);
+    } else {
+      builtInPresets.push(preset);
+    }
+  }
+
+  return { builtInPresets, customPresets };
+}
+
+function resetScreensaverState() {
+  lockedWindowId = null;
+  passwordProtectionEnabled = false;
+  multiMonitorWindowIds = [];
+}
+
+async function closeWindows(windowIds: number[]) {
+  if (windowIds.length === 0) return;
+  await Promise.allSettled(
+    windowIds.map((windowId) => browser.windows.remove(windowId))
+  );
+}
+
+async function stopScreensaver(options: { skipWindowId?: number } = {}) {
+  const windowIdsToClose = multiMonitorWindowIds.filter(
+    (windowId) => windowId !== options.skipWindowId
+  );
+
+  // Clear state before closing windows to avoid re-entrancy in onRemoved.
+  resetScreensaverState();
+  await closeWindows(windowIdsToClose);
+
+  // Update context menus to hide "Change Running Preset"
+  void createContextMenus();
+}
+
 browser.runtime.onInstalled.addListener(() => {
   logger.info("Gradia extension installed");
 
@@ -46,23 +175,7 @@ browser.runtime.onMessage.addListener(
     }
 
     if (typedMessage.type === "UNLOCK_SCREENSAVER") {
-      // Close all multi-monitor windows if any exist
-      if (multiMonitorWindowIds.length > 0) {
-        for (const windowId of multiMonitorWindowIds) {
-          try {
-            await browser.windows.remove(windowId);
-          } catch {
-            // Window may already be closed, ignore
-          }
-        }
-        multiMonitorWindowIds = [];
-      }
-      lockedWindowId = null;
-      passwordProtectionEnabled = false;
-
-      // Update context menus to hide "Change Running Preset"
-      void createContextMenus();
-
+      await stopScreensaver();
       return;
     }
   }
@@ -71,23 +184,7 @@ browser.runtime.onMessage.addListener(
 browser.windows.onRemoved.addListener(async (windowId) => {
   // Check if this is one of the multi-monitor windows
   if (multiMonitorWindowIds.includes(windowId)) {
-    // Close all other multi-monitor windows
-    for (const id of multiMonitorWindowIds) {
-      if (id !== windowId) {
-        try {
-          await browser.windows.remove(id);
-        } catch {
-          // Window may already be closed, ignore
-        }
-      }
-    }
-    multiMonitorWindowIds = [];
-    lockedWindowId = null;
-    passwordProtectionEnabled = false;
-
-    // Update context menus to hide "Change Running Preset"
-    void createContextMenus();
-
+    await stopScreensaver({ skipWindowId: windowId });
     return;
   }
 
@@ -111,10 +208,7 @@ browser.windows.onRemoved.addListener(async (windowId) => {
 
 async function startScreensaver(multiMonitor: boolean) {
   try {
-    const result = await browser.storage.local.get([
-      "selectedGradient",
-      "screensaverPasswordHash",
-    ]);
+    const result = await browser.storage.local.get(["screensaverPasswordHash"]);
 
     const passwordHash =
       typeof result.screensaverPasswordHash === "string"
@@ -133,34 +227,35 @@ async function startScreensaver(multiMonitor: boolean) {
       chrome.system?.display
     ) {
       const displays = await chrome.system.display.getInfo();
-      const windows: number[] = [];
+      const createdWindows = await Promise.allSettled(
+        displays.map((display) => {
+          const bounds = display.bounds;
+          return browser.windows.create({
+            url: `${screensaverUrl}?multiMonitor=true`,
+            type: "popup",
+            left: bounds.left,
+            top: bounds.top,
+            width: bounds.width,
+            height: bounds.height,
+            state: "normal",
+            focused: false,
+          });
+        })
+      );
+      const windowIds = createdWindows.flatMap((result) =>
+        result.status === "fulfilled" && typeof result.value.id === "number"
+          ? [result.value.id]
+          : []
+      );
 
-      for (const display of displays) {
-        const bounds = display.bounds;
-        const createdWindow = await browser.windows.create({
-          url: `${screensaverUrl}?multiMonitor=true`,
-          type: "popup",
-          left: bounds.left,
-          top: bounds.top,
-          width: bounds.width,
-          height: bounds.height,
-          state: "normal",
-          focused: false,
-        });
-
-        if (createdWindow.id) {
-          windows.push(createdWindow.id);
-        }
-      }
-
-      if (windows.length > 0) {
-        multiMonitorWindowIds = windows;
+      if (windowIds.length > 0) {
+        multiMonitorWindowIds = windowIds;
         try {
           await browser.runtime.sendMessage({
             type: "SCREENSAVER_STARTED",
-            windowId: windows[0],
+            windowId: windowIds[0],
             passwordProtectionEnabled: Boolean(passwordHash),
-            multiMonitorWindowIds: windows,
+            multiMonitorWindowIds: windowIds,
           });
         } catch {
           // Ignore message errors
@@ -207,10 +302,14 @@ browser.commands.onCommand.addListener(async (command) => {
 /**
  * Get all gradient presets (built-in + custom)
  */
-async function loadAllPresets() {
+async function loadAllPresets(): Promise<PresetMenuItem[]> {
   try {
     const customPresets = await getCustomPresets();
-    return [...BUILT_IN_PRESET_METADATA, ...customPresets];
+    const customPresetMetadata = customPresets.map((preset) => ({
+      id: preset.id,
+      name: preset.name,
+    }));
+    return [...BUILT_IN_PRESET_METADATA, ...customPresetMetadata];
   } catch (error) {
     logger.error(`Failed to load presets: ${String(error)}`);
     // Fallback to built-in presets only
@@ -242,238 +341,54 @@ async function createContextMenus() {
     // Load all presets (built-in + custom) and current default
     const allPresets = await loadAllPresets();
     const currentDefault = await getCurrentDefaultPreset();
-    const builtInPresets = allPresets.filter(
-      (p) => !p.id.startsWith("custom-")
-    );
-    const customPresets = allPresets.filter((p) => p.id.startsWith("custom-"));
+    const { builtInPresets, customPresets } = splitPresets(allPresets);
 
-    // Main menu: Start screensaver
-    browser.contextMenus.create({
-      id: "start-screensaver",
-      title: "Start Screensaver",
-      contexts: ["page", "action"],
-    });
+    const rootMenus: ContextMenuCreateProperties[] = [
+      { id: "start-screensaver", title: "Start Screensaver" },
+      { id: "separator-1", type: "separator" },
+      { id: "open-settings", title: "Settings" },
+      { id: "open-about", title: "About" },
+      { id: "separator-2", type: "separator" },
+      { id: "quick-start", title: "Quick Start with Preset" },
+      { id: "separator-3", type: "separator" },
+      { id: "set-default", title: "Set as Default" },
+    ];
 
-    // Separator
-    browser.contextMenus.create({
-      id: "separator-1",
-      type: "separator",
-      contexts: ["page", "action"],
-    });
-
-    // Settings
-    browser.contextMenus.create({
-      id: "open-settings",
-      title: "Settings",
-      contexts: ["page", "action"],
-    });
-
-    // About
-    browser.contextMenus.create({
-      id: "open-about",
-      title: "About",
-      contexts: ["page", "action"],
-    });
-
-    // Separator
-    browser.contextMenus.create({
-      id: "separator-2",
-      type: "separator",
-      contexts: ["page", "action"],
-    });
-
-    // Quick start with specific presets (parent menu)
-    browser.contextMenus.create({
-      id: "quick-start",
-      title: "Quick Start with Preset",
-      contexts: ["page", "action"],
-    });
-
-    // Add built-in presets
-    for (const preset of builtInPresets) {
-      browser.contextMenus.create({
-        id: `preset-${preset.id}`,
-        parentId: "quick-start",
-        title: preset.name,
-        contexts: ["page", "action"],
-      });
+    for (const menu of rootMenus) {
+      createMenu(menu);
     }
 
-    // Add custom presets if any
-    if (customPresets.length > 0) {
-      browser.contextMenus.create({
-        id: "separator-preset-custom",
-        parentId: "quick-start",
-        type: "separator",
-        contexts: ["page", "action"],
-      });
-
-      for (const preset of customPresets) {
-        browser.contextMenus.create({
-          id: `preset-${preset.id}`,
-          parentId: "quick-start",
-          title: preset.name,
-          contexts: ["page", "action"],
-        });
-      }
-    }
-
-    // Add random options
-    browser.contextMenus.create({
-      id: "separator-preset-random",
+    createPresetMenuGroup({
       parentId: "quick-start",
-      type: "separator",
-      contexts: ["page", "action"],
+      builtInPresets,
+      customPresets,
+      idPrefix: "preset-",
+      titleForPreset: (preset) => preset.name,
+      titleForRandom: (item) => item.title,
     });
 
-    browser.contextMenus.create({
-      id: "preset-random-preset",
-      parentId: "quick-start",
-      title: "Random (Preset)",
-      contexts: ["page", "action"],
-    });
-
-    browser.contextMenus.create({
-      id: "preset-random-full",
-      parentId: "quick-start",
-      title: "Random (Full)",
-      contexts: ["page", "action"],
-    });
-
-    // Separator
-    browser.contextMenus.create({
-      id: "separator-3",
-      type: "separator",
-      contexts: ["page", "action"],
-    });
-
-    // Set as Default menu
-    browser.contextMenus.create({
-      id: "set-default",
-      title: "Set as Default",
-      contexts: ["page", "action"],
-    });
-
-    // Add built-in presets
-    for (const preset of builtInPresets) {
-      const isDefault = currentDefault === preset.id;
-      browser.contextMenus.create({
-        id: `default-${preset.id}`,
-        parentId: "set-default",
-        title: isDefault ? `✓ ${preset.name}` : preset.name,
-        contexts: ["page", "action"],
-      });
-    }
-
-    // Add custom presets if any
-    if (customPresets.length > 0) {
-      browser.contextMenus.create({
-        id: "separator-default-custom",
-        parentId: "set-default",
-        type: "separator",
-        contexts: ["page", "action"],
-      });
-
-      for (const preset of customPresets) {
-        const isDefault = currentDefault === preset.id;
-        browser.contextMenus.create({
-          id: `default-${preset.id}`,
-          parentId: "set-default",
-          title: isDefault ? `✓ ${preset.name}` : preset.name,
-          contexts: ["page", "action"],
-        });
-      }
-    }
-
-    // Add random options
-    browser.contextMenus.create({
-      id: "separator-default-random",
+    createPresetMenuGroup({
       parentId: "set-default",
-      type: "separator",
-      contexts: ["page", "action"],
-    });
-
-    browser.contextMenus.create({
-      id: "default-random-preset",
-      parentId: "set-default",
-      title:
-        currentDefault === "random-preset"
-          ? "✓ Random (Preset)"
-          : "Random (Preset)",
-      contexts: ["page", "action"],
-    });
-
-    browser.contextMenus.create({
-      id: "default-random-full",
-      parentId: "set-default",
-      title:
-        currentDefault === "random-full" ? "✓ Random (Full)" : "Random (Full)",
-      contexts: ["page", "action"],
+      builtInPresets,
+      customPresets,
+      idPrefix: "default-",
+      titleForPreset: (preset) =>
+        formatCheckedTitle(preset.name, currentDefault === preset.id),
+      titleForRandom: (item) =>
+        formatCheckedTitle(item.title, currentDefault === item.id),
     });
 
     // Change Running Preset menu (only if screensaver is running)
     if (isScreensaverRunning()) {
-      browser.contextMenus.create({
-        id: "separator-4",
-        type: "separator",
-        contexts: ["page", "action"],
-      });
-
-      browser.contextMenus.create({
-        id: "change-running",
-        title: "Change Running Preset",
-        contexts: ["page", "action"],
-      });
-
-      // Add built-in presets
-      for (const preset of builtInPresets) {
-        browser.contextMenus.create({
-          id: `change-${preset.id}`,
-          parentId: "change-running",
-          title: preset.name,
-          contexts: ["page", "action"],
-        });
-      }
-
-      // Add custom presets if any
-      if (customPresets.length > 0) {
-        browser.contextMenus.create({
-          id: "separator-change-custom",
-          parentId: "change-running",
-          type: "separator",
-          contexts: ["page", "action"],
-        });
-
-        for (const preset of customPresets) {
-          browser.contextMenus.create({
-            id: `change-${preset.id}`,
-            parentId: "change-running",
-            title: preset.name,
-            contexts: ["page", "action"],
-          });
-        }
-      }
-
-      // Add random options
-      browser.contextMenus.create({
-        id: "separator-change-random",
+      createSeparator("separator-4");
+      createMenu({ id: "change-running", title: "Change Running Preset" });
+      createPresetMenuGroup({
         parentId: "change-running",
-        type: "separator",
-        contexts: ["page", "action"],
-      });
-
-      browser.contextMenus.create({
-        id: "change-random-preset",
-        parentId: "change-running",
-        title: "Random (Preset)",
-        contexts: ["page", "action"],
-      });
-
-      browser.contextMenus.create({
-        id: "change-random-full",
-        parentId: "change-running",
-        title: "Random (Full)",
-        contexts: ["page", "action"],
+        builtInPresets,
+        customPresets,
+        idPrefix: "change-",
+        titleForPreset: (preset) => preset.name,
+        titleForRandom: (item) => item.title,
       });
     }
 
@@ -486,46 +401,40 @@ async function createContextMenus() {
 // Handle context menu clicks
 browser.contextMenus.onClicked.addListener(async (info) => {
   try {
-    if (info.menuItemId === "start-screensaver") {
+    const menuItemId = info.menuItemId;
+    if (menuItemId === "start-screensaver") {
       const result = await browser.storage.local.get(["multiMonitor"]);
       const multiMonitor = Boolean(result.multiMonitor);
       void startScreensaver(multiMonitor);
-    } else if (info.menuItemId === "open-settings") {
+    } else if (menuItemId === "open-settings") {
       await browser.runtime.openOptionsPage();
-    } else if (info.menuItemId === "open-about") {
+    } else if (menuItemId === "open-about") {
       await browser.tabs.create({
         url: browser.runtime.getURL("src/about.html"),
       });
-    } else if (
-      typeof info.menuItemId === "string" &&
-      info.menuItemId.startsWith("preset-")
-    ) {
+    } else if (typeof menuItemId !== "string") {
+      return;
+    } else if (menuItemId.startsWith("preset-")) {
       // Quick Start: Extract preset ID, save it, and start screensaver
-      const presetId = info.menuItemId.replace("preset-", "");
+      const presetId = menuItemId.replace("preset-", "");
       await browser.storage.local.set({ selectedGradient: presetId });
 
       const result = await browser.storage.local.get(["multiMonitor"]);
       const multiMonitor = Boolean(result.multiMonitor);
       void startScreensaver(multiMonitor);
-    } else if (
-      typeof info.menuItemId === "string" &&
-      info.menuItemId.startsWith("default-")
-    ) {
+    } else if (menuItemId.startsWith("default-")) {
       // Set as Default: Extract preset ID and save it (don't start screensaver)
-      const presetId = info.menuItemId.replace("default-", "");
+      const presetId = menuItemId.replace("default-", "");
       await browser.storage.local.set({ selectedGradient: presetId });
 
       // Recreate menus to update the checkmark
       void createContextMenus();
 
       logger.info(`Default preset set to: ${presetId}`);
-    } else if (
-      typeof info.menuItemId === "string" &&
-      info.menuItemId.startsWith("change-")
-    ) {
+    } else if (menuItemId.startsWith("change-")) {
       // Change Running Preset: Extract preset ID and save it
       // The main.tsx listener will automatically apply the change
-      const presetId = info.menuItemId.replace("change-", "");
+      const presetId = menuItemId.replace("change-", "");
       await browser.storage.local.set({ selectedGradient: presetId });
 
       logger.info(`Running preset changed to: ${presetId}`);
