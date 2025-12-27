@@ -1,6 +1,7 @@
 import browser from "webextension-polyfill";
 import logger from "./logger";
 import { BUILT_IN_PRESET_METADATA } from "./lib/preset";
+import { getCustomPresets } from "./lib/custom-presets";
 
 let lockedWindowId: number | null = null;
 let passwordProtectionEnabled = false;
@@ -58,6 +59,10 @@ browser.runtime.onMessage.addListener(
       }
       lockedWindowId = null;
       passwordProtectionEnabled = false;
+
+      // Update context menus to hide "Change Running Preset"
+      void createContextMenus();
+
       return;
     }
   }
@@ -79,6 +84,10 @@ browser.windows.onRemoved.addListener(async (windowId) => {
     multiMonitorWindowIds = [];
     lockedWindowId = null;
     passwordProtectionEnabled = false;
+
+    // Update context menus to hide "Change Running Preset"
+    void createContextMenus();
+
     return;
   }
 
@@ -156,6 +165,9 @@ async function startScreensaver(multiMonitor: boolean) {
         } catch {
           // Ignore message errors
         }
+
+        // Update context menus to show "Change Running Preset"
+        void createContextMenus();
       }
     } else {
       const createdWindow = await browser.windows.create({
@@ -173,6 +185,9 @@ async function startScreensaver(multiMonitor: boolean) {
       } catch {
         // Ignore message errors
       }
+
+      // Update context menus to show "Change Running Preset"
+      void createContextMenus();
     }
   } catch (error) {
     logger.error(`Failed to start screensaver: ${String(error)}`);
@@ -187,11 +202,50 @@ browser.commands.onCommand.addListener(async (command) => {
   }
 });
 
+// Helper functions for context menus
+
+/**
+ * Get all gradient presets (built-in + custom)
+ */
+async function loadAllPresets() {
+  try {
+    const customPresets = await getCustomPresets();
+    return [...BUILT_IN_PRESET_METADATA, ...customPresets];
+  } catch (error) {
+    logger.error(`Failed to load presets: ${String(error)}`);
+    // Fallback to built-in presets only
+    return BUILT_IN_PRESET_METADATA;
+  }
+}
+
+/**
+ * Check if screensaver is currently running
+ */
+function isScreensaverRunning(): boolean {
+  return lockedWindowId !== null || multiMonitorWindowIds.length > 0;
+}
+
+/**
+ * Get the current default preset ID
+ */
+async function getCurrentDefaultPreset(): Promise<string> {
+  const result = await browser.storage.local.get(["selectedGradient"]);
+  return (result.selectedGradient as string | undefined) || "halo";
+}
+
 // Create context menus
 async function createContextMenus() {
   try {
     // Remove all existing menus first
     await browser.contextMenus.removeAll();
+
+    // Load all presets (built-in + custom) and current default
+    const allPresets = await loadAllPresets();
+    const currentDefault = await getCurrentDefaultPreset();
+    const builtInPresets = allPresets.filter(
+      (p) => !p.id.startsWith("custom-")
+    );
+    const customPresets = allPresets.filter((p) => p.id.startsWith("custom-"));
 
     // Main menu: Start screensaver
     browser.contextMenus.create({
@@ -236,7 +290,7 @@ async function createContextMenus() {
     });
 
     // Add built-in presets
-    for (const preset of BUILT_IN_PRESET_METADATA) {
+    for (const preset of builtInPresets) {
       browser.contextMenus.create({
         id: `preset-${preset.id}`,
         parentId: "quick-start",
@@ -245,9 +299,28 @@ async function createContextMenus() {
       });
     }
 
+    // Add custom presets if any
+    if (customPresets.length > 0) {
+      browser.contextMenus.create({
+        id: "separator-preset-custom",
+        parentId: "quick-start",
+        type: "separator",
+        contexts: ["page", "action"],
+      });
+
+      for (const preset of customPresets) {
+        browser.contextMenus.create({
+          id: `preset-${preset.id}`,
+          parentId: "quick-start",
+          title: preset.name,
+          contexts: ["page", "action"],
+        });
+      }
+    }
+
     // Add random options
     browser.contextMenus.create({
-      id: "separator-preset",
+      id: "separator-preset-random",
       parentId: "quick-start",
       type: "separator",
       contexts: ["page", "action"],
@@ -266,6 +339,143 @@ async function createContextMenus() {
       title: "Random (Full)",
       contexts: ["page", "action"],
     });
+
+    // Separator
+    browser.contextMenus.create({
+      id: "separator-3",
+      type: "separator",
+      contexts: ["page", "action"],
+    });
+
+    // Set as Default menu
+    browser.contextMenus.create({
+      id: "set-default",
+      title: "Set as Default",
+      contexts: ["page", "action"],
+    });
+
+    // Add built-in presets
+    for (const preset of builtInPresets) {
+      const isDefault = currentDefault === preset.id;
+      browser.contextMenus.create({
+        id: `default-${preset.id}`,
+        parentId: "set-default",
+        title: isDefault ? `✓ ${preset.name}` : preset.name,
+        contexts: ["page", "action"],
+      });
+    }
+
+    // Add custom presets if any
+    if (customPresets.length > 0) {
+      browser.contextMenus.create({
+        id: "separator-default-custom",
+        parentId: "set-default",
+        type: "separator",
+        contexts: ["page", "action"],
+      });
+
+      for (const preset of customPresets) {
+        const isDefault = currentDefault === preset.id;
+        browser.contextMenus.create({
+          id: `default-${preset.id}`,
+          parentId: "set-default",
+          title: isDefault ? `✓ ${preset.name}` : preset.name,
+          contexts: ["page", "action"],
+        });
+      }
+    }
+
+    // Add random options
+    browser.contextMenus.create({
+      id: "separator-default-random",
+      parentId: "set-default",
+      type: "separator",
+      contexts: ["page", "action"],
+    });
+
+    browser.contextMenus.create({
+      id: "default-random-preset",
+      parentId: "set-default",
+      title:
+        currentDefault === "random-preset"
+          ? "✓ Random (Preset)"
+          : "Random (Preset)",
+      contexts: ["page", "action"],
+    });
+
+    browser.contextMenus.create({
+      id: "default-random-full",
+      parentId: "set-default",
+      title:
+        currentDefault === "random-full" ? "✓ Random (Full)" : "Random (Full)",
+      contexts: ["page", "action"],
+    });
+
+    // Change Running Preset menu (only if screensaver is running)
+    if (isScreensaverRunning()) {
+      browser.contextMenus.create({
+        id: "separator-4",
+        type: "separator",
+        contexts: ["page", "action"],
+      });
+
+      browser.contextMenus.create({
+        id: "change-running",
+        title: "Change Running Preset",
+        contexts: ["page", "action"],
+      });
+
+      // Add built-in presets
+      for (const preset of builtInPresets) {
+        browser.contextMenus.create({
+          id: `change-${preset.id}`,
+          parentId: "change-running",
+          title: preset.name,
+          contexts: ["page", "action"],
+        });
+      }
+
+      // Add custom presets if any
+      if (customPresets.length > 0) {
+        browser.contextMenus.create({
+          id: "separator-change-custom",
+          parentId: "change-running",
+          type: "separator",
+          contexts: ["page", "action"],
+        });
+
+        for (const preset of customPresets) {
+          browser.contextMenus.create({
+            id: `change-${preset.id}`,
+            parentId: "change-running",
+            title: preset.name,
+            contexts: ["page", "action"],
+          });
+        }
+      }
+
+      // Add random options
+      browser.contextMenus.create({
+        id: "separator-change-random",
+        parentId: "change-running",
+        type: "separator",
+        contexts: ["page", "action"],
+      });
+
+      browser.contextMenus.create({
+        id: "change-random-preset",
+        parentId: "change-running",
+        title: "Random (Preset)",
+        contexts: ["page", "action"],
+      });
+
+      browser.contextMenus.create({
+        id: "change-random-full",
+        parentId: "change-running",
+        title: "Random (Full)",
+        contexts: ["page", "action"],
+      });
+    }
 
     logger.info("Context menus created successfully");
   } catch (error) {
@@ -290,18 +500,47 @@ browser.contextMenus.onClicked.addListener(async (info) => {
       typeof info.menuItemId === "string" &&
       info.menuItemId.startsWith("preset-")
     ) {
-      // Extract preset ID
+      // Quick Start: Extract preset ID, save it, and start screensaver
       const presetId = info.menuItemId.replace("preset-", "");
-
-      // Save the selected preset
       await browser.storage.local.set({ selectedGradient: presetId });
 
-      // Start screensaver with the selected preset
       const result = await browser.storage.local.get(["multiMonitor"]);
       const multiMonitor = Boolean(result.multiMonitor);
       void startScreensaver(multiMonitor);
+    } else if (
+      typeof info.menuItemId === "string" &&
+      info.menuItemId.startsWith("default-")
+    ) {
+      // Set as Default: Extract preset ID and save it (don't start screensaver)
+      const presetId = info.menuItemId.replace("default-", "");
+      await browser.storage.local.set({ selectedGradient: presetId });
+
+      // Recreate menus to update the checkmark
+      void createContextMenus();
+
+      logger.info(`Default preset set to: ${presetId}`);
+    } else if (
+      typeof info.menuItemId === "string" &&
+      info.menuItemId.startsWith("change-")
+    ) {
+      // Change Running Preset: Extract preset ID and save it
+      // The main.tsx listener will automatically apply the change
+      const presetId = info.menuItemId.replace("change-", "");
+      await browser.storage.local.set({ selectedGradient: presetId });
+
+      logger.info(`Running preset changed to: ${presetId}`);
     }
   } catch (error) {
     logger.error(`Failed to handle context menu click: ${String(error)}`);
+  }
+});
+
+// Listen for storage changes to update context menus when custom presets change
+browser.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === "sync" && changes.customGradientPresets) {
+    // Custom presets were added, modified, or deleted
+    // Recreate context menus to reflect the changes
+    void createContextMenus();
+    logger.info("Context menus updated due to custom preset changes");
   }
 });
