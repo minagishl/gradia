@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-21
+
 ### Added
 
 - Nine new built-in fullscreen shader presets: **Glitter Cloth Sunrise**, **Lava Lamp Classic**, two **Neural Noise** variants, three **Plasma Grid** palettes, and two **Specular Band** themes. Shader files live under `src/lib/shaders/glsl/`.
@@ -132,7 +134,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README with installation, usage, and development guides
 - Added important notes about multi-monitor functionality
 
-[Unreleased]: https://github.com/minagishl/gradia/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/minagishl/gradia/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/minagishl/gradia/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/minagishl/gradia/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/minagishl/gradia/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/minagishl/gradia/releases/tag/v1.0.0
