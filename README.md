@@ -14,12 +14,12 @@ A beautiful animated gradient screensaver for Chrome as an extension.
 
 ## introduction
 
-Gradia is a lightweight Chrome extension screensaver built with React, Vite, and WebGL shader gradients. Features beautiful animated gradient visualizations that transform your browser into a mesmerizing display.
+Gradia is a lightweight Chrome extension screensaver built with React, Vite, and WebGL. It combines shader-gradient scenes with additional fullscreen shader effects that transform your browser into a calm, animated display.
 
 ## Features
 
-- **10 Stunning Gradient Presets**: Choose from Aurora Borealis, Cosmic Nebula, Galaxy Swirl, and more
-- **Advanced Animations**: WebGL-based shader gradients with dynamic 3D camera movements and color transitions
+- **31 Built-in Presets**: Classic 3D shader gradients plus fullscreen shader effects (glass over animated backdrops, glitter cloth, lava lamp, neural noise, plasma grid, specular bands)
+- **Advanced Animations**: WebGL shaders with dynamic 3D camera movements, color transitions, and procedural motion
 - **Smooth Performance**: Hardware-accelerated WebGL rendering with adaptive pixel density
 - **Simple Controls**: Launch with one click or keyboard shortcut, exit with Escape key
 - **Keyboard Shortcut**: Quick launch with `Ctrl+Shift+S` (Windows/Linux) or `Command+Shift+S` (Mac)
@@ -33,7 +33,7 @@ Gradia is a lightweight Chrome extension screensaver built with React, Vite, and
 - [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vite.dev/) for fast development and builds
 - [@shadergradient/react](https://github.com/ruucm/shadergradient) for WebGL-based shader gradient rendering
-- [Three.js](https://threejs.org/) + [React Three Fiber](https://github.com/pmndrs/react-three-fiber) for 3D graphics
+- [Three.js](https://threejs.org/) + [React Three Fiber](https://github.com/pmndrs/react-three-fiber) + [@react-three/drei](https://github.com/pmndrs/drei) for fullscreen shader canvases
 - Chrome Extension Manifest V3
 - Modern web extension APIs
 
@@ -200,14 +200,15 @@ gradia/
 
 ### Animation System
 
-The screensaver uses [@shadergradient/react](https://github.com/ruucm/shadergradient) for WebGL-based shader gradient rendering:
+The screensaver uses two rendering paths:
 
-1. **WebGL Shaders**: Hardware-accelerated gradient rendering using custom GLSL shaders
-2. **Three.js Scene**: 3D scene management with optimized rendering pipeline
-3. **Dynamic Properties**: Each preset defines camera position, rotation, colors, lighting, and animation parameters
-4. **Adaptive Pixel Density**: Automatically adjusts rendering resolution based on screen size and orientation for optimal performance
-5. **React Three Fiber**: Declarative 3D rendering with React components
-6. **Real-time Animation**: Smooth gradient transitions and movements powered by WebGL
+1. **Shader Gradient presets** ([@shadergradient/react](https://github.com/ruucm/shadergradient)): 3D gradient scenes with camera, lighting, and material parameters per preset.
+2. **Fullscreen shader presets** (`src/lib/shaders/`): Fullscreen fragment shaders (and a two-pass glass composition) implemented with React Three Fiber.
+
+Shared behavior:
+
+- **Adaptive pixel density**: Resolution scales with screen size, orientation, and preset settings where applicable.
+- **Hardware acceleration**: WebGL throughout.
 
 ### Performance
 

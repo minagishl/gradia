@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Eleven new built-in fullscreen shader presets: three **Glass** presets (animated backdrop plus refractive rods), **Glitter Cloth Sunrise**, **Lava Lamp Classic**, **Neural Noise Flow**, three **Plasma Grid** palettes, and two **Specular Band** themes. Shader files live under `src/lib/shaders/glsl/`.
+
 ## [1.1.0] - 2025-12-27
 
 ### Added

@@ -126,7 +126,7 @@ export function PresetEditorForm({
                 <SelectValue placeholder="Start from scratch" />
               </SelectTrigger>
               <SelectContent>
-                {GRADIENT_PRESETS.map((preset) => (
+                {GRADIENT_PRESETS.filter((p) => !p.shader).map((preset) => (
                   <SelectItem key={preset.id} value={preset.id}>
                     {preset.name}
                   </SelectItem>

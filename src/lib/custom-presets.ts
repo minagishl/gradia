@@ -74,6 +74,7 @@ const gradientPresetSchema = z.object({
     fov: z.number().positive(),
   }),
   props: shaderGradientPropsSchema,
+  shader: z.never().optional(),
 });
 
 // Schema for array of presets (for import validation)

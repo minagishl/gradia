@@ -3,6 +3,10 @@
  * Safe to import in Service Workers and background scripts
  */
 
+import type { ShaderConfig } from "./shaders/config";
+
+export type { ShaderConfig } from "./shaders/config";
+
 type ShaderGradientProps = {
   animate?: "on" | "off";
   axesHelper?: string;
@@ -55,6 +59,8 @@ export interface GradientPreset {
     fov: number;
   };
   props: ShaderGradientProps;
+  /** Fullscreen shader presets (React screensaver only). */
+  shader?: ShaderConfig;
 }
 
 export const GRADIENT_PRESETS: GradientPreset[] = [
@@ -986,6 +992,122 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
       uStrength: 2.6,
       uTime: 0,
       wireframe: false,
+    },
+  },
+  {
+    id: "glitter-cloth-sunrise",
+    name: "Glitter Cloth Sunrise",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "glitter-cloth",
+      color: "#ff6900",
+      speed: 0.85,
+      brightness: 1.05,
+      blendStrength: 0.022,
+      noiseScale: 4,
+      vignetteStrength: 16,
+      vignettePower: 0.26,
+      vignetteOpacity: 1,
+    },
+  },
+  {
+    id: "lava-lamp-classic",
+    name: "Lava Lamp Classic",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "lava-lamp",
+      color: "#18181b",
+      fresnelColor: "#ff6900",
+      speed: 1,
+      fresnelPower: 3,
+      radius: 1,
+      smoothness: 0.1,
+    },
+  },
+  {
+    id: "neural-noise-flow",
+    name: "Neural Noise Flow",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "neural-noise",
+      speed: 0.5,
+    },
+  },
+  {
+    id: "neural-noise-aqua",
+    name: "Neural Noise Aqua",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "neural-noise",
+      speed: 0.46,
+      color: "#7ee7ff",
+    },
+  },
+  {
+    id: "plasma-grid-charcoal",
+    name: "Plasma Grid Charcoal",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "plasma-grid",
+      color: "#18181b",
+      highlightColor: "#572400",
+    },
+  },
+  {
+    id: "plasma-grid-daylight",
+    name: "Plasma Grid Daylight",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "plasma-grid",
+      color: "#ffffff",
+      highlightColor: "#ff6900",
+    },
+  },
+  {
+    id: "plasma-grid-abyss",
+    name: "Plasma Grid Abyss",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "plasma-grid",
+      color: "#061018",
+      highlightColor: "#22d3ee",
+    },
+  },
+  {
+    id: "specular-band-noir",
+    name: "Specular Band Noir",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "specular-band",
+      color: "#ff6900",
+      backgroundColor: "#191a1d",
+      speed: 0.8,
+      distortion: 0.2,
+      hueShift: 30,
+      intensity: 1,
+    },
+  },
+  {
+    id: "specular-band-reef",
+    name: "Specular Band Reef",
+    canvas: { pixelDensity: 1, fov: 45 },
+    props: {},
+    shader: {
+      effect: "specular-band",
+      color: "#34d399",
+      backgroundColor: "#0f1729",
+      speed: 0.75,
+      distortion: 0.22,
+      hueShift: 42,
+      intensity: 1.05,
     },
   },
 ];

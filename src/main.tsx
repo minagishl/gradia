@@ -385,44 +385,55 @@ function Screensaver() {
                 <div>
                   <strong>Name:</strong> {preset.name}
                 </div>
-                <div>
-                  <strong>Type:</strong> {preset.props.type}
-                </div>
-                <div>
-                  <strong>Colors:</strong> {preset.props.color1},{" "}
-                  {preset.props.color2}, {preset.props.color3}
-                </div>
-                <div>
-                  <strong>Camera Distance:</strong> {preset.props.cDistance}
-                </div>
-                <div>
-                  <strong>Camera Zoom:</strong> {preset.props.cameraZoom}
-                </div>
-                <div>
-                  <strong>Camera Angles:</strong> Azimuth:{" "}
-                  {preset.props.cAzimuthAngle}°, Polar:{" "}
-                  {preset.props.cPolarAngle}°
-                </div>
-                <div>
-                  <strong>Position:</strong> X: {preset.props.positionX}, Y:{" "}
-                  {preset.props.positionY}, Z: {preset.props.positionZ}
-                </div>
-                <div>
-                  <strong>Rotation:</strong> X: {preset.props.rotationX}°, Y:{" "}
-                  {preset.props.rotationY}°, Z: {preset.props.rotationZ}°
-                </div>
-                <div>
-                  <strong>Brightness:</strong> {preset.props.brightness}
-                </div>
-                <div>
-                  <strong>Grain:</strong> {preset.props.grain}
-                </div>
-                <div>
-                  <strong>Light Type:</strong> {preset.props.lightType}
-                </div>
-                <div>
-                  <strong>Environment:</strong> {preset.props.envPreset}
-                </div>
+                {preset.shader ? (
+                  <div>
+                    <strong>Shader</strong>
+                    <pre className="mt-1 max-h-48 overflow-auto rounded border p-2 font-mono text-xs">
+                      {JSON.stringify(preset.shader, null, 2)}
+                    </pre>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <strong>Type:</strong> {preset.props.type}
+                    </div>
+                    <div>
+                      <strong>Colors:</strong> {preset.props.color1},{" "}
+                      {preset.props.color2}, {preset.props.color3}
+                    </div>
+                    <div>
+                      <strong>Camera Distance:</strong> {preset.props.cDistance}
+                    </div>
+                    <div>
+                      <strong>Camera Zoom:</strong> {preset.props.cameraZoom}
+                    </div>
+                    <div>
+                      <strong>Camera Angles:</strong> Azimuth:{" "}
+                      {preset.props.cAzimuthAngle}°, Polar:{" "}
+                      {preset.props.cPolarAngle}°
+                    </div>
+                    <div>
+                      <strong>Position:</strong> X: {preset.props.positionX}, Y:{" "}
+                      {preset.props.positionY}, Z: {preset.props.positionZ}
+                    </div>
+                    <div>
+                      <strong>Rotation:</strong> X: {preset.props.rotationX}°,
+                      Y: {preset.props.rotationY}°, Z: {preset.props.rotationZ}°
+                    </div>
+                    <div>
+                      <strong>Brightness:</strong> {preset.props.brightness}
+                    </div>
+                    <div>
+                      <strong>Grain:</strong> {preset.props.grain}
+                    </div>
+                    <div>
+                      <strong>Light Type:</strong> {preset.props.lightType}
+                    </div>
+                    <div>
+                      <strong>Environment:</strong> {preset.props.envPreset}
+                    </div>
+                  </>
+                )}
               </div>
             </Field>
           </FieldGroup>

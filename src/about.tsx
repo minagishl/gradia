@@ -49,18 +49,18 @@ function AboutPage() {
             <h3 className="font-semibold">About</h3>
             <p className="text-muted-foreground text-sm">
               Gradia is a beautiful screensaver extension that transforms your
-              browser into an animated gradient display. With{" "}
+              browser into an animated display. With{" "}
               {BUILT_IN_PRESET_METADATA.length} built-in presets and support for
-              custom gradients, you can create stunning visual experiences while
-              your browser is idle.
+              custom gradient presets, you can create calm visual experiences
+              while your browser is idle.
             </p>
           </div>
           <div className="space-y-2">
             <h3 className="font-semibold">Features</h3>
             <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
               <li>
-                {BUILT_IN_PRESET_METADATA.length} beautiful built-in gradient
-                presets
+                {BUILT_IN_PRESET_METADATA.length} beautiful built-in presets
+                (shader gradients and fullscreen motion shaders)
               </li>
               <li>Create and manage custom gradient presets</li>
               <li>Multi-monitor support</li>

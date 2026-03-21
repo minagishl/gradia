@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 import type { GradientPreset } from "../lib/preset";
+import { ShaderScreensaverCanvas } from "./shader-screensaver-canvas";
 
 interface ScreensaverCanvasProps {
   preset: GradientPreset;
@@ -50,6 +51,15 @@ export const ScreensaverCanvas = ({ preset }: ScreensaverCanvasProps) => {
       window.removeEventListener("orientationchange", updatePixelDensity);
     };
   }, [preset.canvas.pixelDensity]);
+
+  if (preset.shader) {
+    return (
+      <ShaderScreensaverCanvas
+        config={preset.shader}
+        pixelDensity={pixelDensity}
+      />
+    );
+  }
 
   return (
     <ShaderGradientCanvas
