@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Eleven new built-in fullscreen shader presets: three **Glass** presets (animated backdrop plus refractive rods), **Glitter Cloth Sunrise**, **Lava Lamp Classic**, **Neural Noise Flow**, three **Plasma Grid** palettes, and two **Specular Band** themes. Shader files live under `src/lib/shaders/glsl/`.
+- Nine new built-in fullscreen shader presets: **Glitter Cloth Sunrise**, **Lava Lamp Classic**, two **Neural Noise** variants, three **Plasma Grid** palettes, and two **Specular Band** themes. Shader files live under `src/lib/shaders/glsl/`.
+- Shader switching controls for fullscreen playback, with integration across preset data and runtime rendering flow.
+- Auto-hide mouse cursor behavior during fullscreen screensaver playback.
+
+### Changed
+
+- Context menu generation was optimized for faster and more maintainable menu construction.
+- Fullscreen rendering pipeline was expanded to support both gradient and shader-style presets in a unified flow.
+- Removed an incorrect link from the project documentation.
 
 ## [1.1.0] - 2025-12-27
 
